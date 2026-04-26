@@ -1,0 +1,1557 @@
+<!DOCTYPE html>
+<html lang="ja" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>AppVault</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --radius-xs: 8px;
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --font: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', sans-serif;
+  --transition: 0.28s cubic-bezier(0.25,0.46,0.45,0.94);
+  --type-html: #5e5ce6;
+  --type-url:  #32ade6;
+  --type-bm:   #ff9f0a;
+  --type-pwa:  #30d158;
+  --danger:    #ff453a;
+  --warn:      #ffd60a;
+  --success:   #30d158;
+}
+
+[data-theme="dark"] {
+  --bg:          #000000;
+  --bg2:         #1c1c1e;
+  --bg3:         #2c2c2e;
+  --bg4:         #3a3a3c;
+  --text:        #ffffff;
+  --text2:       rgba(235,235,245,0.6);
+  --text3:       rgba(235,235,245,0.3);
+  --accent:      #0a84ff;
+  --accent2:     #5e5ce6;
+  --sep:         rgba(255,255,255,0.1);
+  --card:        #1c1c1e;
+  --card2:       #2c2c2e;
+  --input-bg:    #1c1c1e;
+  --modal-bg:    rgba(0,0,0,0.75);
+  --shadow-card: 0 2px 20px rgba(0,0,0,0.5);
+  --shadow-lg:   0 8px 40px rgba(0,0,0,0.7);
+  --header-glass: rgba(28,28,30,0.92);
+}
+
+[data-theme="light"] {
+  --bg:          #f2f2f7;
+  --bg2:         #ffffff;
+  --bg3:         #f2f2f7;
+  --bg4:         #e5e5ea;
+  --text:        #000000;
+  --text2:       rgba(60,60,67,0.6);
+  --text3:       rgba(60,60,67,0.3);
+  --accent:      #007aff;
+  --accent2:     #5856d6;
+  --sep:         rgba(60,60,67,0.12);
+  --card:        #ffffff;
+  --card2:       #f2f2f7;
+  --input-bg:    #f2f2f7;
+  --modal-bg:    rgba(0,0,0,0.45);
+  --shadow-card: 0 2px 12px rgba(0,0,0,0.08);
+  --shadow-lg:   0 8px 40px rgba(0,0,0,0.18);
+  --header-glass: rgba(242,242,247,0.92);
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  min-height: 100dvh;
+  transition: background var(--transition), color var(--transition);
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+}
+
+header {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  background: var(--header-glass);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 0.5px solid var(--sep);
+  padding: env(safe-area-inset-top,0) 0 0;
+}
+.header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+.logo { display: flex; align-items: center; gap: 10px; }
+.logo-icon {
+  width: 34px; height: 34px;
+  background: linear-gradient(145deg,#0a84ff,#5e5ce6);
+  border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  box-shadow: 0 2px 8px rgba(10,132,255,0.4);
+  flex-shrink: 0;
+}
+.logo-text { font-size: 1.15rem; font-weight: 700; letter-spacing: -0.3px; }
+.logo-text span { color: var(--accent); }
+.header-right { display: flex; align-items: center; gap: 8px; }
+.db-chip {
+  display: flex; align-items: center; gap: 5px;
+  background: var(--bg3); border-radius: 20px; padding: 5px 10px;
+  font-size: 0.72rem; color: var(--text2); border: 0.5px solid var(--sep);
+}
+.db-dot {
+  width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+  background: var(--text3); transition: background 0.3s;
+}
+.db-dot.online  { background: var(--success); box-shadow: 0 0 6px var(--success); }
+.db-dot.offline { background: var(--danger); }
+.db-dot.loading { background: var(--warn); animation: pulse 1.2s ease-in-out infinite; }
+@keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.3} }
+.count-pill {
+  background: var(--accent); color: #fff;
+  font-size: 0.72rem; font-weight: 700;
+  padding: 4px 10px; border-radius: 20px;
+}
+.hd-icon-btn {
+  width: 34px; height: 34px;
+  background: var(--bg3); border: 0.5px solid var(--sep);
+  border-radius: var(--radius-xs);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; cursor: pointer; transition: background var(--transition);
+  color: var(--text);
+}
+.hd-icon-btn:hover { background: var(--bg4); }
+.hd-icon-btn:active { transform: scale(0.93); }
+
+.search-section {
+  background: var(--header-glass);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 0.5px solid var(--sep);
+  padding: 10px 20px 12px;
+}
+.search-inner {
+  max-width: 1400px; margin: 0 auto;
+  display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+}
+.search-wrap { flex: 1; min-width: 160px; position: relative; }
+.search-icon {
+  position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+  font-size: 14px; color: var(--text3); pointer-events: none;
+}
+.search-wrap input {
+  width: 100%; background: var(--bg3); border: 0.5px solid var(--sep);
+  border-radius: var(--radius-sm); padding: 9px 12px 9px 34px;
+  color: var(--text); font-size: 0.95rem; font-family: var(--font); outline: none;
+  transition: border-color var(--transition), background var(--transition);
+  -webkit-appearance: none;
+}
+.search-wrap input::placeholder { color: var(--text3); }
+.search-wrap input:focus { border-color: var(--accent); background: var(--bg2); }
+.search-section select {
+  background: var(--bg3); border: 0.5px solid var(--sep);
+  border-radius: var(--radius-sm); padding: 9px 12px;
+  color: var(--text); font-size: 0.85rem; font-family: var(--font);
+  outline: none; cursor: pointer; -webkit-appearance: none;
+}
+.segment-wrap {
+  width: 100%; margin-top: 8px;
+  display: flex; align-items: center; gap: 6px;
+  overflow-x: auto; scrollbar-width: none; padding-bottom: 1px;
+}
+.segment-wrap::-webkit-scrollbar { display: none; }
+.seg-btn {
+  display: flex; align-items: center; gap: 5px;
+  padding: 6px 14px; border-radius: 20px;
+  font-size: 0.8rem; font-weight: 600; font-family: var(--font);
+  border: 0.5px solid var(--sep); background: var(--bg3);
+  color: var(--text2); cursor: pointer; white-space: nowrap;
+  transition: all 0.18s; flex-shrink: 0;
+}
+.seg-btn:active { transform: scale(0.95); }
+.seg-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.seg-btn.seg-html .seg-dot { background: var(--type-html); }
+.seg-btn.seg-url  .seg-dot { background: var(--type-url); }
+.seg-btn.seg-bm   .seg-dot { background: var(--type-bm); }
+.seg-btn.seg-pwa  .seg-dot { background: var(--type-pwa); }
+.seg-btn.active-all  { background: var(--accent);     color:#fff; border-color:transparent; box-shadow:0 2px 10px rgba(10,132,255,0.35); }
+.seg-btn.active-html { background: var(--type-html);  color:#fff; border-color:transparent; box-shadow:0 2px 10px rgba(94,92,230,0.35); }
+.seg-btn.active-url  { background: var(--type-url);   color:#fff; border-color:transparent; box-shadow:0 2px 10px rgba(50,173,230,0.35); }
+.seg-btn.active-bm   { background: var(--type-bm);    color:#fff; border-color:transparent; box-shadow:0 2px 10px rgba(255,159,10,0.35); }
+.seg-btn.active-pwa  { background: var(--type-pwa);   color:#fff; border-color:transparent; box-shadow:0 2px 10px rgba(48,209,88,0.35); }
+.btn-new-folder {
+  display: flex; align-items: center; gap: 5px;
+  padding: 6px 14px; border-radius: 20px;
+  font-size: 0.8rem; font-weight: 600; font-family: var(--font);
+  border: 0.5px solid var(--sep); background: var(--bg3);
+  color: var(--text2); cursor: pointer; white-space: nowrap;
+  flex-shrink: 0; transition: all 0.18s;
+}
+.btn-new-folder:hover { border-color: var(--warn); color: var(--warn); }
+.btn-new-folder:active { transform: scale(0.95); }
+
+main { max-width: 1400px; margin: 0 auto; padding: 20px 16px 100px; }
+.section-header { display: flex; align-items: center; gap: 8px; margin: 24px 0 12px; }
+.section-title { font-size: 1.1rem; font-weight: 700; letter-spacing: -0.3px; }
+.section-count {
+  font-size: 0.75rem; color: var(--text2); background: var(--bg3);
+  padding: 2px 8px; border-radius: 10px; border: 0.5px solid var(--sep); font-weight: 600;
+}
+.section-line { flex: 1; height: 0.5px; background: var(--sep); }
+.app-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(260px,1fr)); gap: 14px; }
+
+.folder-card {
+  background: var(--card); border-radius: var(--radius-lg);
+  border: 0.5px solid var(--sep); overflow: hidden; cursor: pointer;
+  transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+  box-shadow: var(--shadow-card);
+}
+.folder-card:hover { transform: translateY(-3px) scale(1.01); box-shadow: var(--shadow-lg); border-color: rgba(255,214,10,0.4); }
+.folder-card:active { transform: scale(0.97); }
+.folder-card.drag-over { border-color: var(--warn); background: rgba(255,214,10,0.04); }
+.folder-header { padding: 16px 16px 10px; display: flex; align-items: center; gap: 12px; }
+.folder-emoji {
+  width: 48px; height: 48px; background: var(--bg3);
+  border-radius: var(--radius-sm); display: flex; align-items: center;
+  justify-content: center; font-size: 24px; border: 0.5px solid var(--sep); flex-shrink: 0;
+}
+.folder-name  { font-size: 1rem; font-weight: 700; }
+.folder-count { font-size: 0.75rem; color: var(--text2); margin-top: 2px; }
+.folder-thumbs { display: grid; grid-template-columns: repeat(4,1fr); gap: 3px; padding: 0 12px 12px; }
+.thumb-cell {
+  aspect-ratio: 1; border-radius: var(--radius-xs); background: var(--bg3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; border: 0.5px solid var(--sep);
+}
+.thumb-cell.empty { opacity: 0.3; }
+.folder-footer { padding: 8px 12px; border-top: 0.5px solid var(--sep); display: flex; gap: 4px; justify-content: flex-end; }
+
+.app-card {
+  background: var(--card); border-radius: var(--radius-lg);
+  border: 0.5px solid var(--sep); overflow: hidden; cursor: pointer;
+  display: flex; flex-direction: column;
+  transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+  box-shadow: var(--shadow-card); position: relative;
+}
+.app-card:hover { transform: translateY(-3px) scale(1.01); box-shadow: var(--shadow-lg); }
+.app-card:active { transform: scale(0.97); }
+.app-card.type-html:hover { border-color: rgba(94,92,230,0.4); }
+.app-card.type-url:hover  { border-color: rgba(50,173,230,0.4); }
+.app-card.type-bm:hover   { border-color: rgba(255,159,10,0.4); }
+.app-card.type-pwa:hover  { border-color: rgba(48,209,88,0.4); }
+.app-card.dragging { opacity: 0.4; transform: scale(0.96); }
+.drag-hint {
+  position: absolute; top: 8px; right: 8px; font-size: 10px;
+  color: var(--text3); opacity: 0; transition: opacity 0.2s; pointer-events: none;
+  background: var(--bg3); padding: 2px 6px; border-radius: 6px; border: 0.5px solid var(--sep);
+}
+.app-card:hover .drag-hint { opacity: 0.8; }
+.type-badge {
+  position: absolute; top: 10px; left: 10px; padding: 3px 8px;
+  border-radius: 20px; font-size: 0.65rem; font-weight: 700;
+  letter-spacing: 0.05em; text-transform: uppercase;
+  border: 0.5px solid transparent; backdrop-filter: blur(8px);
+}
+.type-badge.html { background:rgba(94,92,230,0.18);  color:var(--type-html); border-color:rgba(94,92,230,0.35); }
+.type-badge.url  { background:rgba(50,173,230,0.18); color:var(--type-url);  border-color:rgba(50,173,230,0.35); }
+.type-badge.bm   { background:rgba(255,159,10,0.18); color:var(--type-bm);   border-color:rgba(255,159,10,0.35); }
+.type-badge.pwa  { background:rgba(48,209,88,0.18);  color:var(--type-pwa);  border-color:rgba(48,209,88,0.35); }
+.card-art {
+  height: 110px; display: flex; align-items: center; justify-content: center;
+  font-size: 44px; position: relative; overflow: hidden;
+}
+.card-art::before { content:''; position:absolute; inset:0; opacity:0.12; }
+.card-art.html-bg::before { background:radial-gradient(circle at 60% 40%,var(--type-html),transparent 70%); }
+.card-art.url-bg::before  { background:radial-gradient(circle at 60% 40%,var(--type-url),transparent 70%); }
+.card-art.bm-bg::before   { background:radial-gradient(circle at 60% 40%,var(--type-bm),transparent 70%); }
+.card-art.pwa-bg::before  { background:radial-gradient(circle at 60% 40%,var(--type-pwa),transparent 70%); }
+.card-art-overlay {
+  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  background:rgba(0,0,0,0.35); opacity:0; transition:opacity 0.2s;
+  font-size:1.4rem; color:#fff; font-weight:700; backdrop-filter:blur(4px);
+}
+.app-card:hover .card-art-overlay { opacity: 1; }
+.card-body { padding: 12px 14px; flex: 1; display: flex; flex-direction: column; gap: 3px; }
+.card-name { font-size: 0.95rem; font-weight: 700; letter-spacing: -0.2px; }
+.card-desc { font-size: 0.8rem; color: var(--text2); line-height: 1.4; flex: 1; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.card-url-text { font-size: 0.7rem; color: var(--type-url); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.card-pwa-text { font-size: 0.7rem; color: var(--type-pwa); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.card-date { font-size: 0.68rem; color: var(--text3); margin-top: 2px; }
+.bm-drag-row {
+  margin: 6px 12px 0; padding: 7px 10px;
+  background: rgba(255,159,10,0.06); border: 0.5px dashed rgba(255,159,10,0.35);
+  border-radius: var(--radius-xs); font-size: 0.72rem; color: var(--type-bm); text-align: center;
+}
+.bm-drag-link {
+  display: inline-block; padding: 3px 10px;
+  background: rgba(255,159,10,0.15); border-radius: 6px; color: var(--type-bm);
+  font-weight: 700; text-decoration: none; cursor: grab;
+  border: 0.5px solid rgba(255,159,10,0.3); font-size: 0.76rem;
+}
+.card-footer {
+  padding: 8px 10px; border-top: 0.5px solid var(--sep);
+  display: flex; gap: 2px; justify-content: flex-end; align-items: center;
+}
+.icon-action {
+  background: none; border: none; width: 32px; height: 32px;
+  border-radius: var(--radius-xs); cursor: pointer; font-size: 14px;
+  color: var(--text2); display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s, color 0.15s;
+}
+.icon-action:hover { background: var(--bg3); color: var(--text); }
+.icon-action:active { transform: scale(0.9); }
+.icon-action.del:hover { background: rgba(255,69,58,0.12); color: var(--danger); }
+
+.empty-state { grid-column:1/-1; text-align:center; padding:80px 20px; color:var(--text2); }
+.empty-icon  { font-size:64px; margin-bottom:16px; }
+.empty-title { font-size:1.3rem; font-weight:700; color:var(--text); margin-bottom:8px; }
+.empty-sub   { font-size:0.88rem; }
+
+#fab {
+  position: fixed;
+  bottom: calc(28px + env(safe-area-inset-bottom,0));
+  right: 24px; width: 56px; height: 56px;
+  background: var(--accent); border: none; border-radius: 50%;
+  color: #fff; font-size: 26px; cursor: pointer;
+  box-shadow: 0 4px 20px rgba(10,132,255,0.5);
+  transition: transform var(--transition), box-shadow var(--transition);
+  z-index: 150; display: flex; align-items: center; justify-content: center;
+}
+#fab:hover  { transform: scale(1.1) rotate(90deg); box-shadow: 0 6px 28px rgba(10,132,255,0.7); }
+#fab:active { transform: scale(0.94); }
+
+#toast {
+  position: fixed;
+  bottom: calc(96px + env(safe-area-inset-bottom,0));
+  left: 50%; transform: translateX(-50%) translateY(12px);
+  background: var(--bg3); border: 0.5px solid var(--sep);
+  border-radius: var(--radius-md); padding: 11px 18px;
+  font-size: 0.86rem; color: var(--text); box-shadow: var(--shadow-lg);
+  z-index: 9998; opacity: 0; transition: all 0.3s; pointer-events: none;
+  white-space: nowrap; max-width: 90vw; overflow: hidden;
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* モーダル共通 */
+.modal-bg {
+  position: fixed; inset: 0; background: var(--modal-bg);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  z-index: 400; display: flex; align-items: flex-end; justify-content: center;
+  padding: 0; opacity: 0; pointer-events: none; transition: opacity 0.28s;
+}
+.modal-bg.open { opacity: 1; pointer-events: all; }
+@media (min-width: 640px) {
+  .modal-bg { align-items: center; padding: 20px; }
+  .modal { border-radius: var(--radius-xl) !important; transform: scale(0.95) translateY(10px) !important; }
+  .modal-bg.open .modal { transform: scale(1) translateY(0) !important; }
+}
+.modal {
+  background: var(--bg2); border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  width: 100%; max-width: 640px; max-height: 92dvh;
+  display: flex; flex-direction: column;
+  transform: translateY(100%);
+  transition: transform 0.32s cubic-bezier(0.32,0.72,0,1);
+  box-shadow: var(--shadow-lg); border: 0.5px solid var(--sep); overflow: hidden;
+}
+.modal-bg.open .modal { transform: translateY(0); }
+.modal-handle {
+  width: 36px; height: 4px; background: var(--text3);
+  border-radius: 2px; margin: 10px auto 0; flex-shrink: 0;
+}
+.modal-header {
+  padding: 16px 20px 14px; display: flex; align-items: center;
+  justify-content: space-between; border-bottom: 0.5px solid var(--sep); flex-shrink: 0;
+}
+.modal-title-text { font-size: 1.05rem; font-weight: 700; letter-spacing: -0.2px; }
+.modal-close {
+  width: 30px; height: 30px; background: var(--bg3); border: none;
+  border-radius: 50%; font-size: 13px; cursor: pointer; color: var(--text2);
+  display: flex; align-items: center; justify-content: center; transition: background 0.15s;
+}
+.modal-close:hover { background: rgba(255,69,58,0.15); color: var(--danger); }
+.modal-body { padding: 18px 20px 28px; overflow-y: auto; flex: 1; -webkit-overflow-scrolling: touch; }
+
+#pin-modal { z-index: 9999 !important; }
+#pin-modal .modal { z-index: 10000 !important; max-width: 380px; text-align: center; }
+#confirm-modal .modal    { max-width: 360px; text-align: center; }
+#folder-view-modal .modal{ max-width: 880px; }
+#bm-modal .modal         { max-width: 520px; }
+#settings-modal .modal   { max-width: 520px; }
+#folder-name-modal .modal{ max-width: 400px; }
+#viewer-modal .modal     { max-width: 96vw; width: 96vw; max-height: 95dvh; height: 95dvh; }
+#viewer-frame-wrap { flex:1; padding:0 16px 16px; overflow:hidden; display:flex; flex-direction:column; }
+#viewer-frame      { width:100%; flex:1; border:none; border-radius:var(--radius-md); background:#fff; }
+#pwa-modal .modal  { max-width: 700px; }
+
+/* フォーム */
+.type-tabs {
+  display: grid; grid-template-columns: repeat(4,1fr); gap: 6px;
+  margin-bottom: 20px; background: var(--bg3);
+  border-radius: var(--radius-md); padding: 5px; border: 0.5px solid var(--sep);
+}
+.type-tab {
+  padding: 10px 4px; border-radius: var(--radius-sm); text-align: center;
+  border: none; background: transparent; cursor: pointer;
+  transition: all 0.18s; font-size: 0.78rem; font-weight: 600;
+  font-family: var(--font); color: var(--text2);
+}
+.type-tab .tab-icon { font-size: 18px; display: block; margin-bottom: 3px; }
+.type-tab.sel-html { background:var(--type-html); color:#fff; box-shadow:0 2px 8px rgba(94,92,230,0.4); }
+.type-tab.sel-url  { background:var(--type-url);  color:#fff; box-shadow:0 2px 8px rgba(50,173,230,0.4); }
+.type-tab.sel-bm   { background:var(--type-bm);   color:#fff; box-shadow:0 2px 8px rgba(255,159,10,0.4); }
+.type-tab.sel-pwa  { background:var(--type-pwa);  color:#fff; box-shadow:0 2px 8px rgba(48,209,88,0.4); }
+.form-group { margin-bottom: 16px; }
+.form-group label {
+  display: block; font-size: 0.74rem; font-weight: 600; color: var(--text2);
+  text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px;
+}
+.form-group input, .form-group textarea, .form-group select {
+  width: 100%; background: var(--input-bg); border: 0.5px solid var(--sep);
+  border-radius: var(--radius-sm); padding: 11px 14px;
+  color: var(--text); font-size: 1rem; font-family: var(--font); outline: none;
+  transition: border-color var(--transition), background var(--transition);
+  -webkit-appearance: none;
+}
+.form-group input::placeholder, .form-group textarea::placeholder { color: var(--text3); }
+.form-group input:focus, .form-group textarea:focus { border-color: var(--accent); background: var(--bg2); }
+.form-group textarea { resize: vertical; min-height: 180px; font-family:'SF Mono','Consolas','Monaco',monospace; font-size:0.8rem; line-height:1.6; }
+.form-hint { font-size: 0.73rem; color: var(--text2); margin-top: 5px; line-height: 1.5; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.field-block { display: none; }
+.field-block.visible { display: block; }
+.icon-grid { display: grid; grid-template-columns: repeat(8,1fr); gap: 6px; margin-top: 6px; }
+.icon-btn {
+  background: var(--bg3); border: 1.5px solid transparent;
+  border-radius: var(--radius-xs); padding: 7px 4px; font-size: 18px;
+  cursor: pointer; text-align: center; transition: all 0.15s; aspect-ratio: 1;
+}
+.icon-btn:hover, .icon-btn.selected { border-color: var(--accent); background: rgba(10,132,255,0.1); }
+.btn-primary {
+  width: 100%; padding: 13px; background: var(--accent); border: none;
+  border-radius: var(--radius-md); color: #fff; font-size: 0.95rem; font-weight: 700;
+  font-family: var(--font); cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s; margin-top: 4px;
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+}
+.btn-primary:hover  { opacity: 0.88; transform: translateY(-1px); }
+.btn-primary:active { opacity: 0.75; transform: scale(0.98); }
+.btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+.btn-primary.green { background: var(--type-pwa); box-shadow: 0 2px 12px rgba(48,209,88,0.3); }
+
+/* 設定 */
+.settings-group { background:var(--bg3); border-radius:var(--radius-md); border:0.5px solid var(--sep); overflow:hidden; margin-bottom:20px; }
+.settings-group-title { font-size:0.72rem; font-weight:700; color:var(--text2); text-transform:uppercase; letter-spacing:0.07em; padding:14px 16px 10px; border-bottom:0.5px solid var(--sep); }
+.settings-row { padding:14px 16px; border-bottom:0.5px solid var(--sep); }
+.settings-row:last-child { border-bottom:none; }
+.settings-row label { display:block; font-size:0.73rem; font-weight:600; color:var(--text2); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:6px; }
+.settings-row input { width:100%; background:var(--bg2); border:0.5px solid var(--sep); border-radius:var(--radius-xs); padding:10px 12px; color:var(--text); font-size:0.95rem; font-family:var(--font); outline:none; transition:border-color var(--transition); -webkit-appearance:none; }
+.settings-row input:focus { border-color:var(--accent); }
+.theme-toggle { display:flex; background:var(--bg3); border-radius:var(--radius-md); padding:4px; gap:4px; border:0.5px solid var(--sep); }
+.theme-opt { flex:1; padding:10px 8px; border-radius:var(--radius-sm); text-align:center; border:none; background:transparent; cursor:pointer; font-size:0.85rem; font-weight:600; font-family:var(--font); color:var(--text2); transition:all 0.18s; }
+.theme-opt .t-icon { font-size:20px; display:block; margin-bottom:3px; }
+.theme-opt.active { background:var(--bg2); color:var(--text); box-shadow:0 1px 8px rgba(0,0,0,0.15); }
+.storage-card { background:var(--bg3); border-radius:var(--radius-md); border:0.5px solid var(--sep); padding:16px; margin-bottom:0; }
+.storage-header { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px; }
+.storage-used  { font-size:1.3rem; font-weight:800; letter-spacing:-0.5px; }
+.storage-limit { font-size:0.76rem; color:var(--text2); }
+.storage-bar-bg   { height:7px; background:var(--bg4); border-radius:100px; overflow:hidden; margin-bottom:10px; }
+.storage-bar-fill { height:100%; border-radius:100px; background:var(--accent); transition:width 0.6s ease; }
+.storage-bar-fill.warn   { background:var(--warn); }
+.storage-bar-fill.danger { background:var(--danger); }
+.storage-meta { display:flex; gap:16px; flex-wrap:wrap; font-size:0.75rem; color:var(--text2); }
+.storage-meta strong { color:var(--text); font-weight:700; }
+.key-card { background:var(--bg3); border-radius:var(--radius-sm); padding:12px 14px; margin-bottom:8px; border:0.5px solid var(--sep); }
+.key-label { font-size:0.7rem; font-weight:700; color:var(--text2); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:5px; }
+.key-val { display:flex; align-items:flex-start; justify-content:space-between; gap:8px; font-family:'SF Mono','Consolas','Monaco',monospace; font-size:0.8rem; color:var(--text); word-break:break-all; line-height:1.5; }
+.key-copy { background:rgba(10,132,255,0.12); border:0.5px solid rgba(10,132,255,0.25); border-radius:6px; padding:3px 10px; font-size:0.72rem; color:var(--accent); cursor:pointer; white-space:nowrap; flex-shrink:0; font-family:var(--font); }
+.key-copy:hover { background:rgba(10,132,255,0.22); }
+
+.confirm-icon { font-size:48px; margin:10px 0 14px; }
+.confirm-msg  { font-size:0.9rem; color:var(--text2); line-height:1.6; margin-bottom:22px; }
+.confirm-row  { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.btn-cancel { padding:12px; background:var(--bg3); border:0.5px solid var(--sep); border-radius:var(--radius-md); color:var(--text); font-size:0.92rem; font-family:var(--font); cursor:pointer; }
+.btn-cancel:hover { background:var(--bg4); }
+.btn-delete { padding:12px; background:rgba(255,69,58,0.12); border:0.5px solid rgba(255,69,58,0.3); border-radius:var(--radius-md); color:var(--danger); font-size:0.92rem; font-weight:700; font-family:var(--font); cursor:pointer; }
+.btn-delete:hover { background:rgba(255,69,58,0.22); }
+
+.pin-icon  { font-size:52px; margin:10px 0 10px; }
+.pin-title { font-size:1.1rem; font-weight:700; margin-bottom:6px; }
+.pin-sub   { font-size:0.82rem; color:var(--text2); margin-bottom:22px; line-height:1.5; }
+.pin-dots  { display:flex; justify-content:center; gap:16px; margin-bottom:20px; }
+.pin-dot   { width:16px; height:16px; border-radius:50%; background:var(--bg4); border:1.5px solid var(--sep); transition:all 0.15s; }
+.pin-dot.filled { background:var(--accent); border-color:var(--accent); box-shadow:0 0 8px rgba(10,132,255,0.5); }
+.pin-dot.error  { background:var(--danger); border-color:var(--danger); }
+.pin-keypad { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; max-width:240px; margin:0 auto 14px; }
+.pin-key { background:var(--bg3); border:0.5px solid var(--sep); border-radius:var(--radius-md); padding:15px; font-size:1.25rem; font-weight:700; font-family:var(--font); cursor:pointer; transition:all 0.12s; user-select:none; color:var(--text); }
+.pin-key:hover  { background:var(--bg4); border-color:var(--accent); }
+.pin-key:active { transform:scale(0.92); }
+.pin-err-msg { font-size:0.78rem; color:var(--danger); min-height:18px; margin-bottom:4px; }
+
+.bm-drag-zone { text-align:center; padding:20px; background:rgba(255,159,10,0.06); border:1.5px dashed rgba(255,159,10,0.3); border-radius:var(--radius-md); margin-bottom:16px; }
+.bm-drag-zone p { font-size:0.82rem; color:var(--text2); margin-bottom:10px; }
+.bm-drag-link-big { display:inline-block; padding:8px 20px; background:rgba(255,159,10,0.15); border-radius:var(--radius-xs); color:var(--type-bm); font-weight:700; text-decoration:none; cursor:grab; border:0.5px solid rgba(255,159,10,0.4); font-size:0.88rem; }
+.bm-code-block { background:var(--bg3); border-radius:var(--radius-sm); padding:12px; font-family:'SF Mono','Consolas','Monaco',monospace; font-size:0.74rem; color:var(--text); line-height:1.6; word-break:break-all; max-height:140px; overflow-y:auto; border:0.5px solid var(--sep); }
+
+.fv-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:12px; }
+
+/* PWA Wizard */
+.pwa-stepper { display:flex; justify-content:center; align-items:center; margin-bottom:22px; overflow-x:auto; padding:4px 0; scrollbar-width:none; }
+.pwa-stepper::-webkit-scrollbar { display:none; }
+.pwa-step-item { display:flex; align-items:center; }
+.pwa-step-inner { display:flex; flex-direction:column; align-items:center; }
+.pwa-step-circle { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; border:1.5px solid var(--sep); color:var(--text2); background:var(--bg3); transition:all 0.28s; flex-shrink:0; }
+.pwa-step-label { font-size:10px; color:var(--text2); margin-top:4px; white-space:nowrap; }
+.pwa-step-line  { width:30px; height:1.5px; background:var(--sep); flex-shrink:0; margin-bottom:14px; transition:background 0.28s; }
+.pwa-step-item.pwa-active .pwa-step-circle { background:var(--accent); border-color:var(--accent); color:#fff; box-shadow:0 0 12px rgba(10,132,255,0.5); }
+.pwa-step-item.pwa-active .pwa-step-label  { color:var(--accent); font-weight:700; }
+.pwa-step-item.pwa-done  .pwa-step-circle  { background:var(--type-pwa); border-color:var(--type-pwa); color:#fff; }
+.pwa-step-item.pwa-done  .pwa-step-label   { color:var(--type-pwa); }
+.pwa-step-line.pwa-done { background:var(--type-pwa); }
+.pwa-card { display:none; }
+.pwa-card.pwa-active { display:block; animation:pwSlide 0.28s ease; }
+@keyframes pwSlide { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+.info-box { border-radius:var(--radius-sm); padding:12px 14px; font-size:0.82rem; line-height:1.6; margin-bottom:16px; border:0.5px solid; }
+.info-box.blue   { background:rgba(10,132,255,0.08);  border-color:rgba(10,132,255,0.2);  color:var(--text2); }
+.info-box.green  { background:rgba(48,209,88,0.08);   border-color:rgba(48,209,88,0.25);  color:var(--text2); }
+.info-box.yellow { background:rgba(255,214,10,0.08);  border-color:rgba(255,214,10,0.25); color:#ffd60a; }
+.info-box.red    { background:rgba(255,69,58,0.08);   border-color:rgba(255,69,58,0.3);   color:var(--danger); }
+.info-box a { color:var(--accent); text-decoration:none; }
+.info-box strong { color:var(--text); }
+.token-wrap { position:relative; }
+.token-wrap input { padding-right:44px; font-family:'SF Mono','Consolas','Monaco',monospace; }
+.token-vis { position:absolute; right:10px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--text2); cursor:pointer; font-size:16px; padding:4px; }
+.color-pair { display:flex; align-items:center; gap:8px; }
+.color-pair input[type="color"] { width:42px; height:38px; padding:2px; border-radius:var(--radius-xs); background:var(--bg3); border:0.5px solid var(--sep); cursor:pointer; flex-shrink:0; }
+.display-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; }
+.display-opt { border:1.5px solid var(--sep); border-radius:var(--radius-sm); padding:12px 8px; text-align:center; cursor:pointer; transition:all 0.18s; background:var(--bg3); }
+.display-opt:hover { border-color:var(--accent); }
+.display-opt.sel   { border-color:var(--type-pwa); background:rgba(48,209,88,0.08); }
+.display-opt input[type="radio"] { display:none; }
+.d-icon { font-size:20px; margin-bottom:5px; }
+.d-name { font-size:12px; font-weight:700; }
+.d-desc { font-size:10px; color:var(--text2); margin-top:2px; }
+.icon-drop { border:1.5px dashed var(--sep); border-radius:var(--radius-sm); padding:22px; text-align:center; cursor:pointer; transition:all 0.18s; position:relative; }
+.icon-drop:hover, .icon-drop.dragover { border-color:var(--accent); background:rgba(10,132,255,0.05); }
+.icon-drop input[type="file"] { position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%; }
+.icon-preview-img { width:64px; height:64px; border-radius:var(--radius-sm); object-fit:cover; border:1.5px solid var(--sep); display:none; }
+.icon-chips { display:flex; gap:7px; flex-wrap:wrap; }
+.icon-chip { background:var(--bg3); border:0.5px solid var(--sep); border-radius:6px; padding:3px 10px; font-size:11px; color:var(--text2); }
+.icon-chip.ready { border-color:var(--type-pwa); color:var(--type-pwa); }
+.pwa-progress-bar  { background:var(--bg3); border-radius:100px; height:6px; overflow:hidden; margin-bottom:14px; }
+.pwa-progress-fill { height:100%; background:linear-gradient(90deg,var(--accent),var(--type-pwa)); border-radius:100px; transition:width 0.4s ease; width:0%; }
+.pwa-steps-list { display:flex; flex-direction:column; gap:8px; margin-bottom:16px; }
+.pwa-step-row { display:flex; align-items:center; gap:10px; font-size:13px; color:var(--text2); }
+.ps-icon { width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0; background:var(--bg3); border:0.5px solid var(--sep); }
+.pwa-step-row.ps-running .ps-icon { background:rgba(10,132,255,0.15); border-color:var(--accent); animation:pulse 1s infinite; }
+.pwa-step-row.ps-done    .ps-icon { background:rgba(48,209,88,0.12); border-color:var(--type-pwa); color:var(--type-pwa); }
+.pwa-step-row.ps-done    { color:var(--text); }
+.pwa-step-row.ps-error   .ps-icon { background:rgba(255,69,58,0.12); border-color:var(--danger); color:var(--danger); }
+.pwa-step-row.ps-error   { color:var(--danger); }
+.pwa-step-row.ps-skip    { opacity:0.4; }
+.deploy-summary { background:var(--bg3); border-radius:var(--radius-sm); padding:14px 16px; margin-bottom:16px; font-size:12px; line-height:2.1; border:0.5px solid var(--sep); }
+.pwa-success-wrap { text-align:center; padding:12px 0 18px; }
+.pwa-success-icon { font-size:58px; margin-bottom:12px; animation:popIn 0.5s cubic-bezier(0.175,0.885,0.32,1.275); }
+@keyframes popIn { from{transform:scale(0.5);opacity:0} to{transform:scale(1);opacity:1} }
+.pwa-success-title { font-size:22px; font-weight:800; letter-spacing:-0.5px; margin-bottom:6px; background:linear-gradient(135deg,var(--type-pwa),#6ee7b7); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.pwa-url-card { background:var(--bg3); border:0.5px solid var(--type-pwa); border-radius:var(--radius-md); padding:13px 16px; margin:16px 0; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.pwa-url-text { flex:1; font-family:'SF Mono','Consolas','Monaco',monospace; font-size:12px; color:var(--type-pwa); word-break:break-all; }
+.pwa-copy-btn { background:rgba(48,209,88,0.12); border:0.5px solid rgba(48,209,88,0.3); color:var(--type-pwa); border-radius:var(--radius-xs); padding:7px 12px; font-size:11px; font-weight:700; cursor:pointer; white-space:nowrap; font-family:var(--font); }
+.pwa-open-btn { background:rgba(10,132,255,0.12); border:0.5px solid rgba(10,132,255,0.3); color:var(--accent); border-radius:var(--radius-xs); padding:7px 12px; font-size:11px; font-weight:700; cursor:pointer; white-space:nowrap; text-decoration:none; display:inline-flex; align-items:center; font-family:var(--font); }
+#pwa-qrcode { display:flex; justify-content:center; margin:12px 0; }
+#pwa-qrcode canvas, #pwa-qrcode img { border-radius:var(--radius-sm); border:1.5px solid var(--sep); }
+.install-guide { background:var(--bg3); border-radius:var(--radius-md); padding:14px 16px; margin:10px 0; }
+.install-guide h3 { font-size:12px; font-weight:700; color:var(--text2); margin-bottom:12px; text-transform:uppercase; letter-spacing:0.06em; }
+.install-step { display:flex; gap:10px; margin-bottom:10px; font-size:12px; line-height:1.5; }
+.install-num { width:20px; height:20px; background:var(--accent); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:800; flex-shrink:0; margin-top:1px; color:#fff; }
+.pwa-btn-row { display:flex; gap:10px; justify-content:flex-end; margin-top:20px; flex-wrap:wrap; }
+.btn-secondary { background:var(--bg3); color:var(--text); border:0.5px solid var(--sep); border-radius:var(--radius-sm); padding:11px 18px; font-size:0.88rem; font-weight:600; font-family:var(--font); cursor:pointer; transition:all 0.18s; }
+.btn-secondary:hover { border-color:var(--accent); color:var(--accent); }
+.spinner { width:16px; height:16px; border:2px solid rgba(255,255,255,0.3); border-top-color:#fff; border-radius:50%; animation:spin 0.7s linear infinite; display:none; flex-shrink:0; }
+@keyframes spin { to{transform:rotate(360deg)} }
+::-webkit-scrollbar { width:4px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--text3); border-radius:2px; }
+</style>
+
+  <link rel="manifest" href="/conan202601/manifest.json">
+  <meta name="theme-color" content="#7c6aff">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="MyAppStore">
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="apple-touch-icon" href="/conan202601/icon-192.png">
+  <script>if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('/conan202601/sw.js').catch(()=>{});});}</script>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-icon">🗂</div>
+      <div class="logo-text">App<span>Vault</span></div>
+    </div>
+    <div class="header-right">
+      <div class="db-chip">
+        <div class="db-dot loading" id="db-dot"></div>
+        <span id="db-label">起動中</span>
+      </div>
+      <span class="count-pill" id="count-badge">0 apps</span>
+      <button class="hd-icon-btn" onclick="openSettings()" title="設定">⚙️</button>
+    </div>
+  </div>
+</header>
+
+<div class="search-section">
+  <div class="search-inner">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="search-input" placeholder="アプリを検索..." oninput="renderAll()" />
+    </div>
+    <select id="sort-select" onchange="renderAll()">
+      <option value="newest">新しい順</option>
+      <option value="oldest">古い順</option>
+      <option value="name">名前順</option>
+    </select>
+    <div class="segment-wrap">
+      <button class="seg-btn seg-all active-all" data-filter="all"  onclick="setFilter('all')">すべて</button>
+      <button class="seg-btn seg-html"           data-filter="html" onclick="setFilter('html')"><span class="seg-dot"></span>HTML</button>
+      <button class="seg-btn seg-url"            data-filter="url"  onclick="setFilter('url')"><span class="seg-dot"></span>URL</button>
+      <button class="seg-btn seg-bm"             data-filter="bm"   onclick="setFilter('bm')"><span class="seg-dot"></span>ブックマークレット</button>
+      <button class="seg-btn seg-pwa"            data-filter="pwa"  onclick="setFilter('pwa')"><span class="seg-dot"></span>PWA</button>
+      <button class="btn-new-folder"             onclick="openFolderNameModal(null)">📁 新しいフォルダ</button>
+    </div>
+  </div>
+</div>
+
+<main><div id="main-grid"></div></main>
+<button id="fab" onclick="openRegisterModal(null)">＋</button>
+
+<!-- 登録/編集 -->
+<div class="modal-bg" id="register-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <span class="modal-title-text" id="modal-title">📥 アプリを登録</span>
+      <button class="modal-close" onclick="closeModal('register-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="type-tabs" id="type-tabs">
+        <div class="type-tab sel-html" data-type="html" onclick="selectType('html')"><span class="tab-icon">📄</span>HTML</div>
+        <div class="type-tab" data-type="url"  onclick="selectType('url')"><span class="tab-icon">🔗</span>URL</div>
+        <div class="type-tab" data-type="bm"   onclick="selectType('bm')"><span class="tab-icon">🔖</span>BM</div>
+        <div class="type-tab" data-type="pwa"  onclick="selectType('pwa')"><span class="tab-icon">⚡</span>PWA</div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>アプリ名 *</label><input type="text" id="f-name" placeholder="例: カラーピッカー" /></div>
+        <div class="form-group"><label>アイコン絵文字</label><input type="text" id="f-icon-input" placeholder="📱" maxlength="4" oninput="selectIconFromInput(this.value)" style="text-align:center;font-size:1.4rem;" /></div>
+      </div>
+      <div class="form-group"><label>よく使う絵文字</label><div class="icon-grid" id="icon-grid"></div></div>
+      <div class="form-group"><label>説明（任意）</label><input type="text" id="f-desc" placeholder="このアプリの説明を一言で..." /></div>
+      <div class="form-group"><label>フォルダ（任意）</label><select id="f-folder"><option value="">フォルダなし</option></select></div>
+      <div class="field-block visible" id="field-html">
+        <div class="form-group"><label>HTMLコード *</label><textarea id="f-html" placeholder="&lt;!DOCTYPE html&gt; から..."></textarea></div>
+      </div>
+      <div class="field-block" id="field-url">
+        <div class="form-group"><label>URL *</label><input type="url" id="f-url" placeholder="https://your-app.example.com" /><p class="form-hint">外部URLを登録します。タップで新しいタブで開きます。</p></div>
+      </div>
+      <div class="field-block" id="field-bm">
+        <div class="form-group"><label>ブックマークレットコード *</label><textarea id="f-bm" placeholder="javascript:(function(){...})()" style="min-height:110px;"></textarea><p class="form-hint">javascript: から始まるコードを入力してください。</p></div>
+      </div>
+      <div class="field-block" id="field-pwa">
+        <div class="info-box green">⚡ <strong>PWAデプロイ</strong>モードです。下のボタンからウィザードを開き、HTMLをペーストしてGitHub PagesへPWA化・デプロイできます。完了後は自動的に倉庫へ登録されます。</div>
+        <button class="btn-primary green" onclick="openPwaWizard()">⚡ PWAデプロイウィザードを開く</button>
+      </div>
+      <button class="btn-primary" id="save-btn" onclick="saveApp()" style="margin-top:10px;">
+        <span class="spinner" id="save-spinner"></span>
+        <span id="save-label">💾 保存する</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- PWA Wizard -->
+<div class="modal-bg" id="pwa-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <span class="modal-title-text">⚡ PWAデプロイウィザード</span>
+      <button class="modal-close" onclick="closePwaModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="pwa-stepper" id="pwa-stepper">
+        <div class="pwa-step-item pwa-active" id="psi-0"><div class="pwa-step-inner"><div class="pwa-step-circle">1</div><div class="pwa-step-label">GitHub</div></div></div>
+        <div class="pwa-step-line" id="psl-0"></div>
+        <div class="pwa-step-item" id="psi-1"><div class="pwa-step-inner"><div class="pwa-step-circle">2</div><div class="pwa-step-label">HTML</div></div></div>
+        <div class="pwa-step-line" id="psl-1"></div>
+        <div class="pwa-step-item" id="psi-2"><div class="pwa-step-inner"><div class="pwa-step-circle">3</div><div class="pwa-step-label">設定</div></div></div>
+        <div class="pwa-step-line" id="psl-2"></div>
+        <div class="pwa-step-item" id="psi-3"><div class="pwa-step-inner"><div class="pwa-step-circle">4</div><div class="pwa-step-label">デプロイ</div></div></div>
+        <div class="pwa-step-line" id="psl-3"></div>
+        <div class="pwa-step-item" id="psi-4"><div class="pwa-step-inner"><div class="pwa-step-circle">5</div><div class="pwa-step-label">完了</div></div></div>
+      </div>
+      <div class="pwa-card pwa-active" id="pwa-step-0">
+        <div class="info-box blue">💡 <a href="https://github.com/settings/tokens/new" target="_blank">github.com/settings/tokens/new</a> → <strong>Tokens (classic)</strong> → <strong>「repo」スコープのみ</strong>チェックして生成。<br>設定済みのTokenがあれば自動引き継ぎされます。</div>
+        <div class="form-group"><label>Personal Access Token (Classic)</label>
+          <div class="token-wrap"><input type="password" id="pw-token" placeholder="ghp_... （設定済みなら空欄でOK）" /><button class="token-vis" onclick="pwToggleVis()">👁</button></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>リポジトリ名 *</label><input type="text" id="pw-repo" placeholder="my-pwa-app" oninput="pwSanitizeRepo(this)" /></div>
+          <div class="form-group"><label>公開設定</label><select id="pw-visibility"><option value="false">Public（無料・推奨）</option><option value="true">Private（有料プラン必要）</option></select></div>
+        </div>
+        <div class="info-box yellow" id="pw-private-warn" style="display:none;">⚠️ PrivateリポジトリでのGitHub Pages利用にはGitHub Proが必要です。</div>
+        <div class="info-box red" id="pw-step0-err" style="display:none;"></div>
+        <div class="pwa-btn-row"><button class="btn-primary green" onclick="pwVerifyToken()">接続確認 &amp; 次へ →</button></div>
+      </div>
+      <div class="pwa-card" id="pwa-step-1">
+        <div class="form-group"><label>HTMLソースコード *</label><textarea id="pw-html" placeholder="&lt;!DOCTYPE html&gt;&#10;&lt;html&gt;...&lt;/html&gt;" style="min-height:200px;font-family:'SF Mono','Consolas','Monaco',monospace;font-size:0.8rem;" spellcheck="false"></textarea></div>
+        <div class="info-box blue" id="pw-html-info" style="display:none;"></div>
+        <div class="pwa-btn-row"><button class="btn-secondary" onclick="pwGoStep(0)">← 戻る</button><button class="btn-primary green" onclick="pwValidateHtml()">次へ →</button></div>
+      </div>
+      <div class="pwa-card" id="pwa-step-2">
+        <div class="form-row">
+          <div class="form-group"><label>アプリ名（フル）*</label><input type="text" id="pw-appname" placeholder="My Business App" /></div>
+          <div class="form-group"><label>ショートネーム *</label><input type="text" id="pw-shortname" placeholder="MyApp" /></div>
+        </div>
+        <div class="form-group"><label>アプリの説明</label><input type="text" id="pw-desc" placeholder="業務用ツール" /></div>
+        <div class="form-row">
+          <div class="form-group"><label>テーマカラー</label><div class="color-pair"><input type="color" id="pw-theme" value="#0a84ff" oninput="pwSyncColor('pw-theme','pw-theme-hex')"><input type="text" id="pw-theme-hex" value="#0a84ff" oninput="pwSyncHex('pw-theme-hex','pw-theme')" style="flex:1;"></div></div>
+          <div class="form-group"><label>背景カラー</label><div class="color-pair"><input type="color" id="pw-bg" value="#000000" oninput="pwSyncColor('pw-bg','pw-bg-hex')"><input type="text" id="pw-bg-hex" value="#000000" oninput="pwSyncHex('pw-bg-hex','pw-bg')" style="flex:1;"></div></div>
+        </div>
+        <div class="form-group"><label>表示モード</label>
+          <div class="display-grid">
+            <label class="display-opt sel" onclick="pwSelectDisplay(this)"><input type="radio" name="pw-display" value="standalone" checked><div class="d-icon">📱</div><div class="d-name">Standalone</div><div class="d-desc">アプリ風・推奨</div></label>
+            <label class="display-opt" onclick="pwSelectDisplay(this)"><input type="radio" name="pw-display" value="fullscreen"><div class="d-icon">⛶</div><div class="d-name">Fullscreen</div><div class="d-desc">全画面</div></label>
+            <label class="display-opt" onclick="pwSelectDisplay(this)"><input type="radio" name="pw-display" value="minimal-ui"><div class="d-icon">🌐</div><div class="d-name">Minimal UI</div><div class="d-desc">最小限のUI</div></label>
+            <label class="display-opt" onclick="pwSelectDisplay(this)"><input type="radio" name="pw-display" value="browser"><div class="d-icon">🖥</div><div class="d-name">Browser</div><div class="d-desc">通常ブラウザ</div></label>
+          </div>
+        </div>
+        <div class="form-group"><label>アプリアイコン（推奨512×512px・PNG・スキップ可）</label>
+          <div class="icon-drop" id="pw-icon-drop" ondragover="pwDragOver(event)" ondragleave="pwDragLeave()" ondrop="pwDrop(event)">
+            <input type="file" id="pw-icon-file" accept="image/*" onchange="pwHandleIcon(this.files[0])">
+            <div id="pw-icon-upload-content"><div style="font-size:28px;margin-bottom:6px;">🖼</div><div style="font-size:12px;font-weight:600;color:var(--text2);">クリックまたはドラッグ＆ドロップ</div><div style="font-size:11px;color:var(--text3);margin-top:3px;">PNG推奨・512×512px以上</div></div>
+            <div id="pw-icon-preview-content" style="display:none;"><div style="display:flex;align-items:center;gap:14px;justify-content:center;"><img class="icon-preview-img" id="pw-icon-img" src="" alt=""><div class="icon-chips"><div class="icon-chip" id="pw-chip-192">192px ⏳</div><div class="icon-chip" id="pw-chip-512">512px ⏳</div></div></div></div>
+          </div>
+        </div>
+        <div class="pwa-btn-row"><button class="btn-secondary" onclick="pwGoStep(1)">← 戻る</button><button class="btn-primary green" onclick="pwValidateSettings()">確認してデプロイ →</button></div>
+      </div>
+      <div class="pwa-card" id="pwa-step-3">
+        <div class="deploy-summary" id="pwa-deploy-summary"></div>
+        <div class="info-box red" id="pw-deploy-err" style="display:none;"></div>
+        <div id="pwa-progress-wrap" style="display:none;"><div class="pwa-progress-bar"><div class="pwa-progress-fill" id="pwa-progress-fill"></div></div><div class="pwa-steps-list" id="pwa-step-rows"></div></div>
+        <div class="pwa-btn-row" id="pwa-deploy-btns">
+          <button class="btn-secondary" onclick="pwGoStep(2)">← 戻る</button>
+          <button class="btn-primary green" id="pwa-deploy-btn" onclick="pwStartDeploy()">🚀 デプロイ開始</button>
+        </div>
+      </div>
+      <div class="pwa-card" id="pwa-step-4">
+        <div class="pwa-success-wrap"><div class="pwa-success-icon">🎉</div><div class="pwa-success-title">デプロイ完了！</div><p style="color:var(--text2);font-size:12px;margin-top:4px;">倉庫への登録も自動で完了しました</p></div>
+        <div class="pwa-url-card"><div class="pwa-url-text" id="pwa-final-url">-</div><button class="pwa-copy-btn" onclick="pwCopyUrl()">📋 コピー</button><a id="pwa-open-btn" href="#" target="_blank" class="pwa-open-btn">🔗 開く</a></div>
+        <div id="pwa-qrcode"></div>
+        <div class="install-guide">
+          <h3>📱 iPhoneへのインストール手順</h3>
+          <div class="install-step"><div class="install-num">1</div><div>上のURLをiPhoneの<strong>Safari</strong>で開く</div></div>
+          <div class="install-step"><div class="install-num">2</div><div>404が出る場合は1〜2分待ってリロード</div></div>
+          <div class="install-step"><div class="install-num">3</div><div>共有ボタン（□↑）→<strong>「ホーム画面に追加」</strong>をタップ</div></div>
+        </div>
+        <div class="pwa-btn-row" style="justify-content:center;"><button class="btn-secondary" onclick="closePwaModal()">✕ 閉じる</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- フォルダ名前入力 -->
+<div class="modal-bg" id="folder-name-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <span class="modal-title-text" id="folder-name-title">📁 新しいフォルダ</span>
+      <button class="modal-close" onclick="closeModal('folder-name-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group"><label>フォルダ名 *</label><input type="text" id="fn-name" placeholder="例: ツール系" /></div>
+        <div class="form-group"><label>絵文字アイコン</label><input type="text" id="fn-icon" placeholder="📁" maxlength="4" style="text-align:center;font-size:1.4rem;" /></div>
+      </div>
+      <button class="btn-primary" onclick="saveFolder()">💾 保存する</button>
+    </div>
+  </div>
+</div>
+
+<!-- フォルダ展開 -->
+<div class="modal-bg" id="folder-view-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span id="fv-emoji" style="font-size:28px;">📁</span>
+        <div><div id="fv-name" style="font-size:1.1rem;font-weight:800;">フォルダ</div><div id="fv-count" style="font-size:0.76rem;color:var(--text2);">0 個のアプリ</div></div>
+      </div>
+      <button class="modal-close" onclick="closeModal('folder-view-modal')">✕</button>
+    </div>
+    <div class="modal-body"><div class="fv-grid" id="fv-grid"></div></div>
+  </div>
+</div>
+
+<!-- HTMLビューア -->
+<div class="modal-bg" id="viewer-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <span class="modal-title-text" id="viewer-title">アプリを起動</span>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <button class="icon-action" onclick="openInNewTab()" style="width:34px;height:34px;font-size:16px;">↗️</button>
+        <button class="modal-close" onclick="closeViewer()">✕</button>
+      </div>
+    </div>
+    <div id="viewer-frame-wrap"><iframe id="viewer-frame" sandbox="allow-scripts allow-forms allow-modals allow-popups allow-downloads"></iframe></div>
+  </div>
+</div>
+
+<!-- BM詳細 -->
+<div class="modal-bg" id="bm-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <span class="modal-title-text" id="bm-modal-title">🔖 ブックマークレット</span>
+      <button class="modal-close" onclick="closeModal('bm-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="bm-drag-zone"><p>👆 下のボタンをブラウザのブックマークバーにドラッグして登録</p><a id="bm-detail-link" href="#" class="bm-drag-link-big" onclick="return false;">🔖 ドラッグしてブックマークバーへ</a></div>
+      <div style="margin-bottom:6px;font-size:0.73rem;color:var(--text2);font-weight:700;text-transform:uppercase;letter-spacing:0.05em;">コード</div>
+      <div class="bm-code-block" id="bm-detail-code"></div>
+      <button class="btn-primary" style="margin-top:14px;" onclick="copyBmCode()">📋 コードをコピー</button>
+    </div>
+  </div>
+</div>
+
+<!-- 設定 -->
+<div class="modal-bg" id="settings-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <span class="modal-title-text">⚙️ 設定</span>
+      <button class="modal-close" onclick="closeModal('settings-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>外観モード</label>
+        <div class="theme-toggle">
+          <button class="theme-opt active" id="theme-dark"  onclick="setTheme('dark')"><span class="t-icon">🌙</span>ダーク</button>
+          <button class="theme-opt"        id="theme-light" onclick="setTheme('light')"><span class="t-icon">☀️</span>ライト</button>
+        </div>
+      </div>
+      <div class="settings-group">
+        <div class="settings-group-title">🔐 Token・PIN・Gist 設定</div>
+        <div class="settings-row"><label>GitHub Personal Access Token</label><input type="password" id="s-token" placeholder="ghp_..." autocomplete="off" /><p class="form-hint" style="margin-top:5px;">入力後「保存」するとPINで暗号化してGistに保存されます。全端末で同期されます。</p></div>
+        <div class="settings-row"><label>PIN（4桁）</label><input type="password" id="s-pin" placeholder="変更する場合のみ入力" maxlength="4" inputmode="numeric" /><p class="form-hint" style="margin-top:5px;">変更する場合のみ入力してください。空白なら現在のPINを維持します。</p></div>
+        <div class="settings-row"><label>Gist ID</label><input type="text" id="s-gist" placeholder="2c2638d673da5d7f1d0762c8cb518fd1" /></div>
+        <div class="settings-row"><label>データファイル名</label><input type="text" id="s-file" placeholder="webapp-warehouse.json" /></div>
+      </div>
+      <button class="btn-primary" onclick="saveSettings()">💾 保存して再読み込み</button>
+      <div style="margin-top:22px;">
+        <div style="font-size:0.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:10px;">📊 Gist 使用容量</div>
+        <div class="storage-card">
+          <div class="storage-header"><div class="storage-used" id="st-used">-</div><div class="storage-limit">推奨上限: 10 MB</div></div>
+          <div class="storage-bar-bg"><div class="storage-bar-fill" id="st-bar" style="width:0%"></div></div>
+          <div class="storage-meta"><div>アプリ数: <strong id="st-apps">-</strong></div><div>フォルダ数: <strong id="st-folders">-</strong></div><div>残り: <strong id="st-remain">-</strong></div></div>
+        </div>
+      </div>
+      <div style="margin-top:22px;">
+        <div style="font-size:0.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:10px;">📋 接続情報</div>
+        <div class="key-card"><div class="key-label">Gist ID</div><div class="key-val"><span id="st-gist-disp">-</span><button class="key-copy" onclick="copyText(getCfg().gistId,'Gist IDをコピーしました')">コピー</button></div></div>
+        <div class="key-card"><div class="key-label">Token状態</div><div class="key-val"><span id="st-token-status">-</span></div></div>
+      </div>
+      <div style="margin-top:22px;">
+        <div style="font-size:0.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:10px;">🔄 リセット</div>
+        <button onclick="resetAll()" style="width:100%;padding:12px;background:rgba(255,69,58,0.1);border:0.5px solid rgba(255,69,58,0.3);border-radius:var(--radius-md);color:var(--danger);font-size:0.9rem;font-weight:700;font-family:var(--font);cursor:pointer;">⚠️ ローカルデータをリセット（再ログイン）</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 削除確認 -->
+<div class="modal-bg" id="confirm-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-body" style="text-align:center;">
+      <div class="confirm-icon">🗑️</div>
+      <h2 style="font-size:1.1rem;font-weight:700;margin-bottom:8px;">削除しますか？</h2>
+      <p class="confirm-msg" id="confirm-msg"></p>
+      <div class="confirm-row">
+        <button class="btn-cancel" onclick="closeModal('confirm-modal')">キャンセル</button>
+        <button class="btn-delete" id="confirm-delete-btn">削除する</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PIN -->
+<div class="modal-bg" id="pin-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-body" style="text-align:center;">
+      <div class="pin-icon" id="pin-icon">🔐</div>
+      <div class="pin-title" id="pin-title">PINを入力</div>
+      <div class="pin-sub"   id="pin-sub">4桁のPINを入力してください</div>
+      <div class="pin-dots">
+        <div class="pin-dot" id="pd0"></div><div class="pin-dot" id="pd1"></div>
+        <div class="pin-dot" id="pd2"></div><div class="pin-dot" id="pd3"></div>
+      </div>
+      <div class="pin-err-msg" id="pin-err"></div>
+      <div class="pin-keypad">
+        <button class="pin-key" onclick="pinKey('1')">1</button><button class="pin-key" onclick="pinKey('2')">2</button><button class="pin-key" onclick="pinKey('3')">3</button>
+        <button class="pin-key" onclick="pinKey('4')">4</button><button class="pin-key" onclick="pinKey('5')">5</button><button class="pin-key" onclick="pinKey('6')">6</button>
+        <button class="pin-key" onclick="pinKey('7')">7</button><button class="pin-key" onclick="pinKey('8')">8</button><button class="pin-key" onclick="pinKey('9')">9</button>
+        <button class="pin-key" onclick="pinClear()">✕</button><button class="pin-key" onclick="pinKey('0')">0</button><button class="pin-key" onclick="pinBack()">⌫</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+// ================================================================
+// ?reset=1 でlocalStorageをクリアしてリロード
+// ================================================================
+if (location.search.includes('reset=1')) {
+  localStorage.clear();
+  location.href = location.pathname;
+}
+
+// ================================================================
+// 定数
+// ================================================================
+const DEFAULT_GIST_ID  = '2c2638d673da5d7f1d0762c8cb518fd1';
+const DEFAULT_FILE     = 'webapp-warehouse.json';
+const TOKEN_FILE       = 'ww-token.enc';
+const GIST_LIMIT_BYTES = 10 * 1024 * 1024;
+
+// ================================================================
+// Config
+// ================================================================
+function getCfg() { try { const s = localStorage.getItem('ww-cfg'); if (s) return JSON.parse(s); } catch(e){} return { gistId: DEFAULT_GIST_ID, file: DEFAULT_FILE }; }
+function setCfg(cfg) { localStorage.setItem('ww-cfg', JSON.stringify(cfg)); }
+function getAPI() { return `https://api.github.com/gists/${getCfg().gistId}`; }
+
+// ================================================================
+// AES暗号化
+// ================================================================
+async function pinToKey(pin) { const enc = new TextEncoder(); return crypto.subtle.importKey('raw', enc.encode(pin.padEnd(16,'0')), 'AES-GCM', false, ['encrypt','decrypt']); }
+async function encryptToken(token, pin) { const key = await pinToKey(pin); const enc = new TextEncoder(); const iv = crypto.getRandomValues(new Uint8Array(12)); const ct = await crypto.subtle.encrypt({name:'AES-GCM',iv}, key, enc.encode(token)); const combined = new Uint8Array(iv.byteLength + ct.byteLength); combined.set(iv,0); combined.set(new Uint8Array(ct), iv.byteLength); return btoa(String.fromCharCode(...combined)); }
+async function decryptToken(encB64, pin) { try { const key = await pinToKey(pin); const combined = Uint8Array.from(atob(encB64), c => c.charCodeAt(0)); const iv = combined.slice(0,12); const ct = combined.slice(12); const pt = await crypto.subtle.decrypt({name:'AES-GCM',iv}, key, ct); return new TextDecoder().decode(pt); } catch(e) { return null; } }
+
+// ================================================================
+// Token管理
+// ================================================================
+let _token = '';
+async function saveEncryptedToken(ghToken, pin) {
+  const enc = await encryptToken(ghToken, pin);
+  const res = await fetch(getAPI(), { method:'PATCH', headers:{'Authorization':`token ${ghToken}`,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'}, body: JSON.stringify({ files: { [TOKEN_FILE]: { content: enc } } }) });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+}
+
+// ================================================================
+// PIN UI
+// ================================================================
+let _pinInput = '', _pinMode = '', _pinResolve = null, _pinSetupFirst = '';
+function openPinModal(mode, title, sub, icon) {
+  _pinMode = mode; _pinInput = ''; _pinSetupFirst = '';
+  document.getElementById('pin-title').textContent = title || 'PINを入力';
+  document.getElementById('pin-sub').textContent   = sub   || '4桁のPINを入力してください';
+  document.getElementById('pin-icon').textContent  = icon  || '🔐';
+  document.getElementById('pin-err').textContent   = '';
+  updatePinDots();
+  // pin-modalは最前面で開く
+  const el = document.getElementById('pin-modal');
+  el.style.zIndex = '9999';
+  el.classList.add('open');
+  return new Promise(resolve => { _pinResolve = resolve; });
+}
+function pinKey(d) { if (_pinInput.length >= 4) return; _pinInput += d; updatePinDots(); if (_pinInput.length === 4) setTimeout(() => handlePinComplete(), 180); }
+function pinBack()  { _pinInput = _pinInput.slice(0,-1); updatePinDots(); }
+function pinClear() { _pinInput = ''; updatePinDots(); document.getElementById('pin-err').textContent = ''; }
+function updatePinDots(state) { for (let i=0;i<4;i++) { const d = document.getElementById('pd'+i); d.className = 'pin-dot'; if (state==='error') d.classList.add('error'); else if (i < _pinInput.length) d.classList.add('filled'); } }
+async function handlePinComplete() {
+  if (_pinMode === 'setup') {
+    if (!_pinSetupFirst) {
+      _pinSetupFirst = _pinInput; _pinInput = '';
+      document.getElementById('pin-title').textContent = 'PINを再入力';
+      document.getElementById('pin-sub').textContent   = '確認のためもう一度入力してください';
+      updatePinDots();
+    } else {
+      if (_pinInput === _pinSetupFirst) {
+        document.getElementById('pin-modal').classList.remove('open');
+        _pinResolve && _pinResolve(_pinInput);
+      } else {
+        document.getElementById('pin-err').textContent = '❌ PINが一致しません';
+        updatePinDots('error');
+        _pinInput = ''; _pinSetupFirst = '';
+        document.getElementById('pin-title').textContent = 'PINを設定';
+        document.getElementById('pin-sub').textContent   = '新しい4桁のPINを入力してください';
+        setTimeout(() => updatePinDots(), 500);
+      }
+    }
+  } else {
+    document.getElementById('pin-modal').classList.remove('open');
+    _pinResolve && _pinResolve(_pinInput);
+  }
+}
+
+// ================================================================
+// モーダル
+// ================================================================
+let currentZIndex = 400;
+function openModal(id) {
+  currentZIndex += 10;
+  const el = document.getElementById(id);
+  el.style.zIndex = currentZIndex;
+  el.classList.add('open');
+}
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// ================================================================
+// リセット
+// ================================================================
+function resetAll() {
+  if (!confirm('ローカルデータ（キャッシュToken等）をすべてクリアしてリロードします。よろしいですか？')) return;
+  localStorage.clear();
+  location.reload();
+}
+
+// ================================================================
+// 起動フロー（修正版）
+// ================================================================
+async function init() {
+  // ?reset=1 処理は最上部で実施済み
+
+  // テーマ復元
+  const saved = localStorage.getItem('ww-theme');
+  if (saved) document.documentElement.setAttribute('data-theme', saved);
+  buildIconGrid();
+
+  const cfg = getCfg();
+
+  // GistID未設定 → 設定画面へ
+  if (!cfg.gistId) {
+    setStatus('offline', '未設定');
+    openSettings();
+    return;
+  }
+
+  // cachedTokenがある → まず試す
+  if (cfg.cachedToken) {
+    _token = cfg.cachedToken;
+    const ok = await tryLoadData();
+    if (ok) return;
+    // 失敗したらcachedTokenを削除してPINへ
+    _token = '';
+    const newCfg = getCfg();
+    delete newCfg.cachedToken;
+    setCfg(newCfg);
+  }
+
+  // PIN認証へ
+  setStatus('loading', 'PIN認証中...');
+  try {
+    await unlockWithPin();
+  } catch(e) {
+    setStatus('offline', 'エラー');
+    showToast('❌ 起動に失敗しました。設定を確認してください');
+    openSettings();
+  }
+}
+
+async function unlockWithPin() {
+  const pin = await openPinModal('unlock', '🔐 PIN認証', '4桁のPINを入力してください', '🔐');
+  setStatus('loading', 'Token復元中...');
+
+  let decrypted = null;
+  try {
+    const res = await fetch(getAPI() + `?t=${Date.now()}`, { headers: { 'Accept': 'application/vnd.github.v3+json' } });
+    if (res.ok) {
+      const gist = await res.json();
+      const f = gist.files[TOKEN_FILE];
+      if (f) {
+        const enc = f.truncated ? await (await fetch(f.raw_url)).text() : f.content;
+        decrypted = await decryptToken(enc.trim(), pin);
+      }
+    }
+  } catch(e) { /* ネットワークエラー等 */ }
+
+  if (!decrypted) {
+    setStatus('offline', 'PIN不一致またはToken未登録');
+    showToast('❌ PINが違うか、Tokenがまだ保存されていません');
+    // 再試行できるよう設定を開く
+    openSettings();
+    return;
+  }
+
+  _token = decrypted;
+  const c = getCfg(); c.cachedToken = _token; setCfg(c);
+  const ok = await tryLoadData();
+  if (!ok) {
+    showToast('❌ Tokenが無効または期限切れです。設定から更新してください');
+    openSettings();
+  }
+}
+
+async function tryLoadData() {
+  if (!_token) return false;
+  setStatus('loading', '読み込み中...');
+  try {
+    const res = await fetch(getAPI() + `?t=${Date.now()}`, {
+      headers: { 'Authorization': `token ${_token}`, 'Accept': 'application/vnd.github.v3+json' }
+    });
+    if (!res.ok) { setStatus('offline', 'HTTP ' + res.status); return false; }
+    const gist = await res.json();
+    const cfg = getCfg();
+    const fileObj = gist.files[cfg.file || DEFAULT_FILE];
+    if (!fileObj) {
+      // ファイルが無い場合は空データで初期化
+      apps = []; folders = [];
+      await saveToGist();
+      setStatus('online'); renderAll(); return true;
+    }
+    const content = fileObj.truncated ? await (await fetch(fileObj.raw_url)).text() : fileObj.content;
+    const data = JSON.parse(content);
+    apps = data.apps || []; folders = data.folders || [];
+    setStatus('online'); renderAll(); return true;
+  } catch(e) {
+    setStatus('offline', e.message); return false;
+  }
+}
+
+// ================================================================
+// Settings
+// ================================================================
+function openSettings() {
+  const cfg = getCfg();
+  document.getElementById('s-token').value = '';
+  document.getElementById('s-pin').value   = '';
+  document.getElementById('s-gist').value  = cfg.gistId || DEFAULT_GIST_ID;
+  document.getElementById('s-file').value  = cfg.file   || DEFAULT_FILE;
+  const content = JSON.stringify({apps, folders}, null, 2);
+  const bytes = new Blob([content]).size;
+  const pct = Math.min((bytes / GIST_LIMIT_BYTES) * 100, 100);
+  document.getElementById('st-used').textContent    = formatBytes(bytes);
+  document.getElementById('st-apps').textContent    = apps.length;
+  document.getElementById('st-folders').textContent = folders.length;
+  document.getElementById('st-remain').textContent  = formatBytes(Math.max(GIST_LIMIT_BYTES - bytes, 0));
+  document.getElementById('st-gist-disp').textContent  = cfg.gistId || '-';
+  document.getElementById('st-token-status').textContent = _token ? '✅ 設定済み（復号済み）' : '⚠️ 未設定';
+  const bar = document.getElementById('st-bar');
+  bar.style.width = pct + '%';
+  bar.className = 'storage-bar-fill' + (pct > 80 ? ' danger' : pct > 50 ? ' warn' : '');
+  const theme = document.documentElement.getAttribute('data-theme');
+  document.getElementById('theme-dark').classList.toggle('active', theme === 'dark');
+  document.getElementById('theme-light').classList.toggle('active', theme === 'light');
+  openModal('settings-modal');
+}
+
+async function saveSettings() {
+  const newToken = document.getElementById('s-token').value.trim();
+  const newPin   = document.getElementById('s-pin').value.trim();
+  const gistId   = document.getElementById('s-gist').value.trim() || DEFAULT_GIST_ID;
+  const file     = document.getElementById('s-file').value.trim() || DEFAULT_FILE;
+  const cfg = getCfg(); cfg.gistId = gistId; cfg.file = file;
+  if (newToken) {
+    let pin = newPin;
+    if (!pin) {
+      pin = await openPinModal('unlock', '🔐 現在のPINを入力', 'Tokenを暗号化するPINを入力', '🔑');
+    } else {
+      if (newPin.length < 4) { showToast('⚠️ PINは4桁で入力してください'); return; }
+      pin = await openPinModal('setup', '🔐 新しいPINを設定', '新しい4桁のPINを入力してください', '🔑');
+    }
+    try {
+      setStatus('loading', 'Token保存中...');
+      await saveEncryptedToken(newToken, pin);
+      _token = newToken; cfg.cachedToken = newToken; setCfg(cfg);
+      closeModal('settings-modal');
+      showToast('✅ Token・PINを保存しました');
+      await tryLoadData();
+    } catch(e) {
+      setStatus('offline', e.message);
+      showToast('❌ 保存失敗: ' + e.message);
+    }
+  } else {
+    setCfg(cfg);
+    closeModal('settings-modal');
+    showToast('✅ 設定を保存しました');
+    if (_token) await tryLoadData();
+  }
+}
+
+// ================================================================
+// Gist保存
+// ================================================================
+async function saveToGist() {
+  if (!_token) { showToast('⚠️ Token未設定'); return; }
+  const cfg = getCfg();
+  const content = JSON.stringify({apps, folders}, null, 2);
+  const res = await fetch(getAPI(), {
+    method: 'PATCH',
+    headers: { 'Authorization': `token ${_token}`, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
+    body: JSON.stringify({ files: { [cfg.file || DEFAULT_FILE]: { content } } })
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+}
+
+// ================================================================
+// データ・定数
+// ================================================================
+const ICONS = ['🎨','📊','🎵','🎮','🧮','🗒️','🌐','⏰','📷','🔐','🗺️','💡','📝','🔧','📱','🚀','🌈','🎯','🧩','🛠️','🔖','🔗','📄','⚡','🎁','🧪','🌟','🏠','🎪','🔬'];
+const TYPE_META = {
+  html: { label:'HTML', icon:'📄', badge:'html', bgClass:'html-bg', overlay:'▶ 起動' },
+  url:  { label:'URL',  icon:'🔗', badge:'url',  bgClass:'url-bg',  overlay:'↗ 開く' },
+  bm:   { label:'BM',   icon:'🔖', badge:'bm',   bgClass:'bm-bg',   overlay:'🔖 詳細' },
+  pwa:  { label:'PWA',  icon:'⚡', badge:'pwa',  bgClass:'pwa-bg',  overlay:'↗ 開く' },
+};
+let apps = [], folders = [], editingId = null, editingFolderId = null;
+let currentType = 'html', filterType = 'all', viewerHtml = '', currentBmCode = '';
+
+// ================================================================
+// ステータス / フィルタ
+// ================================================================
+function setStatus(s, msg) {
+  document.getElementById('db-dot').className = 'db-dot ' + s;
+  document.getElementById('db-label').textContent = msg || { loading:'読み込み中', online:'同期済み', offline:'エラー' }[s];
+}
+function setFilter(type) {
+  filterType = type;
+  document.querySelectorAll('.seg-btn').forEach(b => {
+    b.className = 'seg-btn seg-' + b.dataset.filter;
+    if (b.dataset.filter === type) b.classList.add('active-' + type);
+  });
+  renderAll();
+}
+
+// ================================================================
+// Render
+// ================================================================
+function renderAll() {
+  const q    = document.getElementById('search-input')?.value.toLowerCase() || '';
+  const sort = document.getElementById('sort-select')?.value || 'newest';
+  const wrap = document.getElementById('main-grid');
+  document.getElementById('count-badge').textContent = apps.length + ' apps';
+
+  if (q) {
+    let list = apps.filter(a => (filterType==='all' || a.type===filterType) && (a.name.toLowerCase().includes(q) || (a.desc||'').toLowerCase().includes(q)));
+    list = sortApps(list, sort);
+    wrap.innerHTML = `<div class="app-grid">${list.length ? list.map(a=>appCardHTML(a)).join('') : emptyHTML('📭','見つかりませんでした','検索条件を変えてみてください')}</div>`;
+    return;
+  }
+
+  let html = '';
+  if (folders.length > 0) {
+    html += `<div class="section-header"><div class="section-title">フォルダ</div><div class="section-count">${folders.length}</div><div class="section-line"></div></div>`;
+    html += `<div class="app-grid">${folders.map(f=>folderCardHTML(f)).join('')}</div>`;
+  }
+  let loose = apps.filter(a => !a.folderId && (filterType==='all' || a.type===filterType));
+  loose = sortApps(loose, sort);
+  html += `<div class="section-header"><div class="section-title">アプリ</div><div class="section-count">${loose.length}</div><div class="section-line"></div></div>`;
+  html += `<div class="app-grid">${loose.length ? loose.map(a=>appCardHTML(a)).join('') : emptyHTML('📭','まだアプリがありません','右下の ＋ から登録しましょう')}</div>`;
+  wrap.innerHTML = html;
+}
+
+function emptyHTML(icon, title, sub) {
+  return `<div class="empty-state"><div class="empty-icon">${icon}</div><div class="empty-title">${title}</div><div class="empty-sub">${sub}</div></div>`;
+}
+
+function folderCardHTML(f) {
+  const children = apps.filter(a => a.folderId===f.id).slice(0,8);
+  const thumbs = Array(8).fill(null).map((_,i) => { const a=children[i]; return `<div class="thumb-cell${a?'':' empty'}">${a?(a.icon||TYPE_META[a.type||'html'].icon):''}</div>`; }).join('');
+  return `<div class="folder-card" id="folder-${f.id}" onclick="openFolderView('${f.id}')" ondragover="folderDragOver(event,'${f.id}')" ondragleave="folderDragLeave(event,'${f.id}')" ondrop="folderDrop(event,'${f.id}')">
+    <div class="folder-header"><div class="folder-emoji">${f.icon||'📁'}</div><div class="folder-info"><div class="folder-name">${escHtml(f.name)}</div><div class="folder-count">${apps.filter(a=>a.folderId===f.id).length} 個のアプリ</div></div></div>
+    <div class="folder-thumbs">${thumbs}</div>
+    <div class="folder-footer" onclick="event.stopPropagation()">
+      <button class="icon-action" onclick="openRegisterModal('${f.id}')" title="追加">＋</button>
+      <button class="icon-action" onclick="openFolderNameModal('${f.id}')" title="編集">✏️</button>
+      <button class="icon-action del" onclick="confirmDeleteFolder('${f.id}','${escAttr(f.name)}')" title="削除">🗑️</button>
+    </div>
+  </div>`;
+}
+
+function appCardHTML(a) {
+  const t=a.type||'html', m=TYPE_META[t]||TYPE_META.html, icon=a.icon||m.icon;
+  let extra='';
+  if(t==='url') extra=`<div class="card-url-text">${escHtml(a.url||'')}</div>`;
+  if(t==='bm')  extra=`<div class="bm-drag-row"><a class="bm-drag-link" href="${escAttr(a.bm||'')}" onclick="event.preventDefault();openBmModal('${a.id}')">${escHtml(a.name)}</a></div>`;
+  if(t==='pwa') extra=`<div class="card-pwa-text">${escHtml(a.url||'')}</div>`;
+  return `<div class="app-card type-${t}" id="app-${a.id}" draggable="true" ondragstart="appDragStart(event,'${a.id}')" ondragend="appDragEnd()" onclick="handleCardClick('${a.id}')">
+    <span class="drag-hint">✥ drag</span>
+    <span class="type-badge ${m.badge}">${m.icon} ${m.label}</span>
+    <div class="card-art ${m.bgClass}">${icon}<div class="card-art-overlay">${m.overlay}</div></div>
+    <div class="card-body">
+      <div class="card-name">${escHtml(a.name)}</div>
+      <div class="card-desc">${escHtml(a.desc||'説明なし')}</div>
+      ${extra}
+      <div class="card-date">📅 ${formatDate(a.createdAt)}</div>
+    </div>
+    <div class="card-footer" onclick="event.stopPropagation()">
+      ${t==='html'?`<button class="icon-action" onclick="copyHtml('${a.id}')" title="HTMLコピー">📋</button>`:''}
+      ${t==='url'||t==='pwa'?`<button class="icon-action" onclick="window.open('${escAttr(a.url||'')}','_blank')" title="開く">↗️</button>`:''}
+      ${t==='bm'?`<button class="icon-action" onclick="copyBmById('${a.id}')" title="コードコピー">📋</button>`:''}
+      ${t==='pwa'?`<button class="icon-action" onclick="pwShowQr('${escAttr(a.url||'')}',event)" title="QRコード">📱</button>`:''}
+      <button class="icon-action" onclick="openEditModal('${a.id}')" title="編集">✏️</button>
+      <button class="icon-action del" onclick="confirmDelete('${a.id}','${escAttr(a.name)}')" title="削除">🗑️</button>
+    </div>
+  </div>`;
+}
+
+// ================================================================
+// ドラッグ
+// ================================================================
+let dragAppId = null;
+function appDragStart(e,id) { dragAppId=id; setTimeout(()=>{ const el=document.getElementById('app-'+id); if(el)el.classList.add('dragging'); },0); }
+function appDragEnd() { if(dragAppId){ const el=document.getElementById('app-'+dragAppId); if(el)el.classList.remove('dragging'); } dragAppId=null; document.querySelectorAll('.folder-card').forEach(f=>f.classList.remove('drag-over')); }
+function folderDragOver(e,id) { e.preventDefault(); const el=document.getElementById('folder-'+id); if(el)el.classList.add('drag-over'); }
+function folderDragLeave(e,id) { const el=document.getElementById('folder-'+id); if(el)el.classList.remove('drag-over'); }
+async function folderDrop(e,folderId) { e.preventDefault(); e.stopPropagation(); const el=document.getElementById('folder-'+folderId); if(el)el.classList.remove('drag-over'); if(!dragAppId)return; const idx=apps.findIndex(a=>a.id===dragAppId); if(idx===-1)return; apps[idx].folderId=folderId; dragAppId=null; try{ await saveToGist(); showToast('📁 フォルダに移動しました'); renderAll(); }catch(e){ showToast('❌ '+e.message); } }
+
+// ================================================================
+// フォルダ
+// ================================================================
+function openFolderView(folderId) { const f=folders.find(x=>x.id===folderId); if(!f)return; const children=apps.filter(a=>a.folderId===folderId); document.getElementById('fv-emoji').textContent=f.icon||'📁'; document.getElementById('fv-name').textContent=f.name; document.getElementById('fv-count').textContent=`${children.length} 個のアプリ`; document.getElementById('fv-grid').innerHTML=children.length?children.map(a=>appCardHTML(a)).join(''):emptyHTML('📭','まだアプリがありません','登録モーダルからこのフォルダを選択してください'); openModal('folder-view-modal'); }
+function openFolderNameModal(folderId) { editingFolderId=folderId; if(folderId){ const f=folders.find(x=>x.id===folderId); document.getElementById('folder-name-title').textContent='✏️ フォルダを編集'; document.getElementById('fn-name').value=f?.name||''; document.getElementById('fn-icon').value=f?.icon||''; }else{ document.getElementById('folder-name-title').textContent='📁 新しいフォルダ'; document.getElementById('fn-name').value=''; document.getElementById('fn-icon').value=''; } openModal('folder-name-modal'); }
+async function saveFolder() { const name=document.getElementById('fn-name').value.trim(); const icon=document.getElementById('fn-icon').value.trim()||'📁'; if(!name){showToast('⚠️ フォルダ名を入力してください');return;} if(editingFolderId){ const idx=folders.findIndex(f=>f.id===editingFolderId); if(idx!==-1)folders[idx]={...folders[idx],name,icon}; }else{ folders.push({id:uid(),name,icon,createdAt:Date.now()}); } try{ await saveToGist(); closeModal('folder-name-modal'); showToast(editingFolderId?'✅ フォルダを更新しました':'✅ フォルダを作成しました'); renderAll(); }catch(e){ showToast('❌ '+e.message); } }
+function confirmDeleteFolder(id,name) { document.getElementById('confirm-msg').textContent=`フォルダ「${name}」を削除します。中のアプリはフォルダなし状態になります。`; document.getElementById('confirm-delete-btn').onclick=async()=>{ apps=apps.map(a=>a.folderId===id?{...a,folderId:null}:a); folders=folders.filter(f=>f.id!==id); try{ await saveToGist(); closeModal('confirm-modal'); showToast('🗑️ フォルダを削除しました'); renderAll(); }catch(e){ showToast('❌ '+e.message); } }; openModal('confirm-modal'); }
+
+// ================================================================
+// アプリ操作
+// ================================================================
+function handleCardClick(id) { const a=apps.find(x=>x.id===id); if(!a)return; const t=a.type||'html'; if(t==='html')openApp(id); if(t==='url'||t==='pwa')window.open(a.url,'_blank'); if(t==='bm')openBmModal(id); }
+function openApp(id) { const a=apps.find(x=>x.id===id); if(!a)return; viewerHtml=a.html; document.getElementById('viewer-title').textContent=`${a.icon||'📄'} ${a.name}`; document.getElementById('viewer-frame').srcdoc=a.html; openModal('viewer-modal'); }
+function closeViewer() { document.getElementById('viewer-frame').srcdoc=''; closeModal('viewer-modal'); }
+function openInNewTab() { if(!viewerHtml)return; window.open(URL.createObjectURL(new Blob([viewerHtml],{type:'text/html'})),'_blank'); }
+function copyHtml(id) { const a=apps.find(x=>x.id===id); if(a)navigator.clipboard.writeText(a.html).then(()=>showToast('📋 HTMLをコピーしました')); }
+function openBmModal(id) { const a=apps.find(x=>x.id===id); if(!a)return; currentBmCode=a.bm||''; document.getElementById('bm-modal-title').textContent=`🔖 ${a.name}`; document.getElementById('bm-detail-link').href=a.bm||'#'; document.getElementById('bm-detail-link').textContent=`🔖 ${a.name}`; document.getElementById('bm-detail-code').textContent=a.bm||''; openModal('bm-modal'); }
+function copyBmCode() { navigator.clipboard.writeText(currentBmCode).then(()=>showToast('📋 コードをコピーしました')); }
+function copyBmById(id) { const a=apps.find(x=>x.id===id); if(a)navigator.clipboard.writeText(a.bm||'').then(()=>showToast('📋 コードをコピーしました')); }
+function pwShowQr(url,event) {
+  event.stopPropagation(); if(!url)return;
+  const old=document.getElementById('qr-popup'); if(old)old.remove();
+  const popup=document.createElement('div');
+  popup.id='qr-popup';
+  popup.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px);';
+  popup.innerHTML=`<div style="background:var(--bg2);border-radius:20px;padding:24px;text-align:center;border:0.5px solid var(--sep);box-shadow:0 8px 40px rgba(0,0,0,0.6);">
+    <div style="font-size:13px;color:var(--text2);margin-bottom:12px;font-weight:600;">📱 SafariでQRコードを読み取る</div>
+    <div id="qr-popup-inner"></div>
+    <div style="font-size:11px;color:var(--type-pwa);margin-top:10px;font-family:monospace;word-break:break-all;max-width:200px;">${url}</div>
+    <button onclick="document.getElementById('qr-popup').remove()" style="margin-top:14px;padding:9px 22px;background:var(--bg3);border:0.5px solid var(--sep);border-radius:10px;color:var(--text);cursor:pointer;font-family:var(--font);font-size:14px;font-weight:600;">閉じる</button>
+  </div>`;
+  document.body.appendChild(popup);
+  popup.addEventListener('click',e=>{ if(e.target===popup)popup.remove(); });
+  try{ new QRCode(document.getElementById('qr-popup-inner'),{text:url,width:180,height:180,colorDark:'#0a84ff',colorLight:document.documentElement.getAttribute('data-theme')==='dark'?'#1c1c1e':'#ffffff'}); }catch(e){}
+}
+
+// ================================================================
+// 登録 / 編集
+// ================================================================
+function openRegisterModal(folderId) { editingId=null; document.getElementById('modal-title').textContent='📥 アプリを登録'; ['f-name','f-icon-input','f-desc','f-html','f-url','f-bm'].forEach(id=>document.getElementById(id).value=''); document.querySelectorAll('.icon-btn').forEach(b=>b.classList.remove('selected')); document.querySelectorAll('.type-tab').forEach(t=>t.style.pointerEvents=''); populateFolderSelect(folderId); selectType('html'); openModal('register-modal'); }
+function populateFolderSelect(selectedId) { document.getElementById('f-folder').innerHTML=`<option value="">フォルダなし（トップに表示）</option>`+folders.map(f=>`<option value="${f.id}" ${f.id===selectedId?'selected':''}>${f.icon||'📁'} ${escHtml(f.name)}</option>`).join(''); }
+function openEditModal(id) { const a=apps.find(x=>x.id===id); if(!a)return; editingId=id; const t=a.type||'html'; document.getElementById('modal-title').textContent='✏️ アプリを編集'; document.getElementById('f-name').value=a.name; document.getElementById('f-icon-input').value=a.icon||''; document.getElementById('f-desc').value=a.desc||''; document.getElementById('f-html').value=a.html||''; document.getElementById('f-url').value=a.url||''; document.getElementById('f-bm').value=a.bm||''; populateFolderSelect(a.folderId||''); document.querySelectorAll('.type-tab').forEach(tab=>tab.style.pointerEvents='none'); selectType(t); openModal('register-modal'); }
+async function saveApp() { const name=document.getElementById('f-name').value.trim(); const icon=document.getElementById('f-icon-input').value.trim()||TYPE_META[currentType].icon; const desc=document.getElementById('f-desc').value.trim(); const folderId=document.getElementById('f-folder').value||null; if(!name){showToast('⚠️ アプリ名を入力してください');return;} if(currentType==='pwa'){showToast('⚠️ PWAはウィザードからデプロイしてください');return;} let extra={}; if(currentType==='html'){const html=document.getElementById('f-html').value.trim();if(!html){showToast('⚠️ HTMLコードを入力してください');return;}extra={html};} if(currentType==='url'){const url=document.getElementById('f-url').value.trim();if(!url){showToast('⚠️ URLを入力してください');return;}extra={url};} if(currentType==='bm'){const bm=document.getElementById('f-bm').value.trim();if(!bm){showToast('⚠️ コードを入力してください');return;}if(!bm.startsWith('javascript:')){showToast('⚠️ javascript: から始まるコードを入力してください');return;}extra={bm};} setSaveLoading(true); try{ if(editingId){ const idx=apps.findIndex(a=>a.id===editingId);if(idx!==-1)apps[idx]={...apps[idx],name,icon,desc,folderId,...extra,updatedAt:Date.now()}; }else{ apps.push({id:uid(),type:currentType,name,icon,desc,folderId,...extra,createdAt:Date.now()}); } await saveToGist(); showToast(editingId?'✅ 更新しました！':'✅ 登録しました！'); closeModal('register-modal'); renderAll(); const fvModal=document.getElementById('folder-view-modal'); if(fvModal.classList.contains('open')&&folderId)openFolderView(folderId); }catch(e){ showToast('❌ '+e.message); }finally{ setSaveLoading(false); } }
+function setSaveLoading(on) { document.getElementById('save-btn').disabled=on; document.getElementById('save-spinner').style.display=on?'block':'none'; document.getElementById('save-label').textContent=on?'保存中...':'💾 保存する'; }
+function confirmDelete(id,name) { document.getElementById('confirm-msg').textContent=`「${name}」を削除すると元に戻せません。`; document.getElementById('confirm-delete-btn').onclick=async()=>{ apps=apps.filter(a=>a.id!==id); try{ await saveToGist(); closeModal('confirm-modal'); closeModal('folder-view-modal'); showToast('🗑️ 削除しました'); renderAll(); }catch(e){ showToast('❌ '+e.message); } }; openModal('confirm-modal'); }
+function selectType(type) { currentType=type; document.querySelectorAll('.type-tab').forEach(t=>{ t.className='type-tab'; if(t.dataset.type===type)t.classList.add('sel-'+type); }); document.getElementById('field-html').classList.toggle('visible',type==='html'); document.getElementById('field-url').classList.toggle('visible',type==='url'); document.getElementById('field-bm').classList.toggle('visible',type==='bm'); document.getElementById('field-pwa').classList.toggle('visible',type==='pwa'); document.getElementById('save-btn').style.display=type==='pwa'?'none':'flex'; }
+function selectIcon(emoji) { document.getElementById('f-icon-input').value=emoji; document.querySelectorAll('.icon-btn').forEach(b=>b.classList.toggle('selected',b.textContent===emoji)); }
+function selectIconFromInput(val) { document.querySelectorAll('.icon-btn').forEach(b=>b.classList.toggle('selected',b.textContent===val)); }
+
+// ================================================================
+// テーマ
+// ================================================================
+function setTheme(theme) { document.documentElement.setAttribute('data-theme',theme); localStorage.setItem('ww-theme',theme); document.getElementById('theme-dark').classList.toggle('active',theme==='dark'); document.getElementById('theme-light').classList.toggle('active',theme==='light'); showToast(theme==='dark'?'🌙 ダークモードに変更しました':'☀️ ライトモードに変更しました'); }
+
+// ================================================================
+// モーダル閉じ
+// ================================================================
+document.querySelectorAll('.modal-bg').forEach(bg => {
+  bg.addEventListener('click', e => {
+    if (e.target !== bg) return;
+    if (bg.id === 'viewer-modal') closeViewer();
+    else if (bg.id === 'pin-modal') return;
+    else if (bg.id === 'pwa-modal') return;
+    else closeModal(bg.id);
+  });
+});
+document.addEventListener('keydown', e => { if (e.key !== 'Escape') return; closeViewer(); ['register-modal','folder-name-modal','folder-view-modal','bm-modal','settings-modal','confirm-modal'].forEach(closeModal); });
+
+// ================================================================
+// Toast
+// ================================================================
+let toastTimer;
+function showToast(msg) { const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>el.classList.remove('show'),2800); }
+
+// ================================================================
+// ユーティリティ
+// ================================================================
+function sortApps(list,sort) { if(sort==='newest')return[...list].sort((a,b)=>b.createdAt-a.createdAt); if(sort==='oldest')return[...list].sort((a,b)=>a.createdAt-b.createdAt); if(sort==='name')return[...list].sort((a,b)=>a.name.localeCompare(b.name)); return list; }
+function uid() { return Math.random().toString(36).slice(2)+Date.now().toString(36); }
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function escAttr(s) { return String(s).replace(/'/g,"\\'").replace(/"/g,'&quot;'); }
+function formatDate(ts) { if(!ts)return'---'; return new Date(ts).toLocaleDateString('ja-JP',{year:'numeric',month:'short',day:'numeric'}); }
+function formatBytes(b) { if(b<1024)return b+' B'; if(b<1024*1024)return(b/1024).toFixed(1)+' KB'; return(b/1024/1024).toFixed(2)+' MB'; }
+function copyText(text,msg) { navigator.clipboard.writeText(text).then(()=>showToast('📋 '+msg)); }
+function buildIconGrid() { document.getElementById('icon-grid').innerHTML=ICONS.map(ic=>`<button class="icon-btn" onclick="selectIcon('${ic}')">${ic}</button>`).join(''); }
+
+// ================================================================
+// PWA Wizard
+// ================================================================
+let pwStep=0, pwUser='', pwToken='', pwIconData={img192:null,img512:null}, pwIconUrl=null, pwDeployedUrl='', pwFolderIdForSave=null;
+
+function openPwaWizard() {
+  pwToken=_token||'';
+  if(pwToken)document.getElementById('pw-token').placeholder='設定済みのTokenを使用します（変更する場合のみ入力）';
+  pwStep=0; pwUser=''; pwIconData={img192:null,img512:null}; pwIconUrl=null; pwDeployedUrl='';
+  pwFolderIdForSave=document.getElementById('f-folder')?.value||null;
+  for(let i=0;i<5;i++){ document.getElementById('psi-'+i).className='pwa-step-item'+(i===0?' pwa-active':''); document.getElementById('pwa-step-'+i).className='pwa-card'+(i===0?' pwa-active':''); if(i<4)document.getElementById('psl-'+i).className='pwa-step-line'; }
+  document.getElementById('pw-step0-err').style.display='none';
+  document.getElementById('pwa-progress-wrap').style.display='none';
+  document.getElementById('pwa-deploy-btns').style.display='flex';
+  document.getElementById('pwa-deploy-btn').disabled=false;
+  document.getElementById('pwa-deploy-btn').textContent='🚀 デプロイ開始';
+  document.getElementById('pw-deploy-err').style.display='none';
+  document.getElementById('pwa-qrcode').innerHTML='';
+  closeModal('register-modal');
+  openModal('pwa-modal');
+}
+function closePwaModal() { closeModal('pwa-modal'); }
+function pwGoStep(n) {
+  document.getElementById('pwa-step-'+pwStep).className='pwa-card';
+  document.getElementById('psi-'+pwStep).className='pwa-step-item'+(n>pwStep?' pwa-done':'');
+  if(n>pwStep&&pwStep<4)document.getElementById('psl-'+pwStep).className='pwa-step-line pwa-done';
+  else if(n<pwStep){ for(let i=n;i<=pwStep;i++){ document.getElementById('psi-'+i).className='pwa-step-item'; if(i<4)document.getElementById('psl-'+i).className='pwa-step-line'; } }
+  pwStep=n;
+  document.getElementById('pwa-step-'+n).className='pwa-card pwa-active';
+  document.getElementById('psi-'+n).className='pwa-step-item pwa-active';
+}
+function pwToggleVis() { const el=document.getElementById('pw-token'); el.type=el.type==='password'?'text':'password'; }
+function pwSanitizeRepo(el) { el.value=el.value.toLowerCase().replace(/[^a-z0-9-_]/g,'-'); }
+function pwSyncColor(cId,hId) { document.getElementById(hId).value=document.getElementById(cId).value; }
+function pwSyncHex(hId,cId) { const v=document.getElementById(hId).value; if(/^#[0-9a-fA-F]{6}$/.test(v))document.getElementById(cId).value=v; }
+function pwSelectDisplay(el) { document.querySelectorAll('.display-opt').forEach(o=>o.classList.remove('sel')); el.classList.add('sel'); el.querySelector('input').checked=true; }
+function pwDragOver(e) { e.preventDefault(); document.getElementById('pw-icon-drop').classList.add('dragover'); }
+function pwDragLeave() { document.getElementById('pw-icon-drop').classList.remove('dragover'); }
+function pwDrop(e) { e.preventDefault(); document.getElementById('pw-icon-drop').classList.remove('dragover'); const f=e.dataTransfer.files[0]; if(f&&f.type.startsWith('image/'))pwHandleIcon(f); }
+function pwHandleIcon(file) { if(!file)return; const reader=new FileReader(); reader.onload=e=>{ const src=e.target.result; pwIconUrl=src; document.getElementById('pw-icon-img').src=src; document.getElementById('pw-icon-img').style.display='block'; document.getElementById('pw-icon-upload-content').style.display='none'; document.getElementById('pw-icon-preview-content').style.display='block'; pwResizeIcon(src,192,'img192','pw-chip-192'); pwResizeIcon(src,512,'img512','pw-chip-512'); }; reader.readAsDataURL(file); }
+function pwResizeIcon(src,size,key,chipId) { const canvas=document.createElement('canvas'); canvas.width=size; canvas.height=size; const img=new Image(); img.onload=()=>{ canvas.getContext('2d').drawImage(img,0,0,size,size); pwIconData[key]=canvas.toDataURL('image/png').split(',')[1]; const chip=document.getElementById(chipId); chip.textContent=size+'px ✓'; chip.classList.add('ready'); }; img.src=src; }
+async function pwGhApi(token,method,path,body) { const res=await fetch('https://api.github.com'+path,{method,headers:{'Authorization':'token '+token,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},body:body?JSON.stringify(body):undefined}); const data=await res.json().catch(()=>({})); if(!res.ok)throw new Error(data.message||(data.errors&&data.errors[0]&&data.errors[0].message)||'HTTP '+res.status); return data; }
+function pwB64(str) { return btoa(unescape(encodeURIComponent(str))); }
+function pwSleep(ms) { return new Promise(r=>setTimeout(r,ms)); }
+
+async function pwVerifyToken() {
+  const inputToken=document.getElementById('pw-token').value.trim();
+  const token=inputToken||pwToken;
+  const repo=document.getElementById('pw-repo').value.trim();
+  const errEl=document.getElementById('pw-step0-err');
+  errEl.style.display='none';
+  if(!token){errEl.textContent='⚠️ Tokenを入力してください';errEl.style.display='block';return;}
+  if(!repo){errEl.textContent='⚠️ リポジトリ名を入力してください';errEl.style.display='block';return;}
+  const btn=event.target; btn.disabled=true; btn.textContent='確認中...';
+  try{
+    const data=await pwGhApi(token,'GET','/user'); pwUser=data.login; pwToken=token;
+    try{ await pwGhApi(token,'GET','/repos/'+pwUser+'/'+repo); errEl.textContent='⚠️ リポジトリ「'+repo+'」は既に存在します。別の名前を入力してください'; errEl.style.display='block'; btn.disabled=false; btn.textContent='接続確認 & 次へ →'; return; }
+    catch(e){ if(!e.message.includes('Not Found')&&!e.message.includes('404'))throw e; }
+    showToast('✅ '+pwUser+' として接続しました'); pwGoStep(1);
+  }catch(e){ errEl.textContent='⚠️ 認証エラー: '+e.message; errEl.style.display='block'; }
+  finally{ btn.disabled=false; btn.textContent='接続確認 & 次へ →'; }
+}
+
+function pwValidateHtml() { const html=document.getElementById('pw-html').value.trim(); if(!html||html.length<20){showToast('HTMLを入力してください');return;} const lines=html.split('\n').length; const size=(new Blob([html]).size/1024).toFixed(1); const info=document.getElementById('pw-html-info'); info.style.display='block'; info.innerHTML=`📊 検出: <strong>${lines}行</strong> / <strong>${size} KB</strong>`; pwGoStep(2); }
+
+function pwValidateSettings() {
+  const name=document.getElementById('pw-appname').value.trim(); const short=document.getElementById('pw-shortname').value.trim();
+  if(!name){showToast('アプリ名を入力してください');return;} if(!short){showToast('ショートネームを入力してください');return;}
+  const repo=document.getElementById('pw-repo').value.trim(); const display=document.querySelector('input[name="pw-display"]:checked').value;
+  document.getElementById('pwa-deploy-summary').innerHTML=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 16px;">
+    <div>👤 ユーザー: <strong>${pwUser}</strong></div><div>📦 リポジトリ: <strong>${repo}</strong></div>
+    <div>📱 アプリ名: <strong>${name}</strong></div><div>🏷 ショート: <strong>${short}</strong></div>
+    <div>🎨 モード: <strong>${display}</strong></div><div>🖼 アイコン: <strong>${pwIconData.img512?'カスタム':'デフォルト'}</strong></div>
+  </div>`;
+  pwGoStep(3);
+}
+
+const PW_STEPS_LABELS=['リポジトリ作成','manifest.json','Service Worker','index.html','アイコン','GitHub Pages有効化','倉庫に保存','完了確認'];
+function pwRenderProgress(states) {
+  const icons={pending:'○',running:'●',done:'✓',error:'✗',skip:'－'};
+  document.getElementById('pwa-step-rows').innerHTML=PW_STEPS_LABELS.map((label,i)=>`<div class="pwa-step-row ps-${states[i]||'pending'}"><div class="ps-icon">${icons[states[i]||'pending']}</div><span>${label}</span></div>`).join('');
+  const done=states.filter(s=>s==='done'||s==='skip').length;
+  document.getElementById('pwa-progress-fill').style.width=((done/PW_STEPS_LABELS.length)*100)+'%';
+}
+
+async function pwStartDeploy() {
+  document.getElementById('pw-deploy-err').style.display='none';
+  const token=pwToken, repo=document.getElementById('pw-repo').value.trim();
+  const isPrivate=document.getElementById('pw-visibility').value==='true';
+  const appName=document.getElementById('pw-appname').value.trim(), shortName=document.getElementById('pw-shortname').value.trim();
+  const desc=document.getElementById('pw-desc').value.trim();
+  const themeColor=document.getElementById('pw-theme-hex').value, bgColor=document.getElementById('pw-bg-hex').value;
+  const display=document.querySelector('input[name="pw-display"]:checked').value;
+  let html=document.getElementById('pw-html').value.trim();
+  const basePath='/'+repo+'/';
+  const states=Array(PW_STEPS_LABELS.length).fill('pending');
+  document.getElementById('pwa-progress-wrap').style.display='block';
+  document.getElementById('pwa-deploy-btns').style.display='none';
+  pwRenderProgress(states);
+  const set=(i,s)=>{ states[i]=s; pwRenderProgress(states); };
+  try{
+    set(0,'running'); await pwGhApi(token,'POST','/user/repos',{name:repo,private:isPrivate,description:desc||appName+' - PWA',auto_init:false}); set(0,'done'); await pwSleep(600);
+    const manifest={name:appName,short_name:shortName,description:desc,start_url:basePath,scope:basePath,display,background_color:bgColor,theme_color:themeColor,orientation:'any',icons:pwIconData.img192?[{src:basePath+'icon-192.png',sizes:'192x192',type:'image/png',purpose:'any maskable'},{src:basePath+'icon-512.png',sizes:'512x512',type:'image/png',purpose:'any maskable'}]:[{src:'https://placehold.co/192x192/0a84ff/ffffff?text=APP',sizes:'192x192',type:'image/png'},{src:'https://placehold.co/512x512/0a84ff/ffffff?text=APP',sizes:'512x512',type:'image/png'}]};
+    const sw=`const CACHE='pwa-v1';\nconst ASSETS=['${basePath}','${basePath}index.html','${basePath}manifest.json'];\nself.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).catch(()=>{}));self.skipWaiting();});\nself.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))));self.clients.claim();});\nself.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).catch(()=>caches.match('${basePath}index.html'))));});`;
+    const pwaHead=`\n  <link rel="manifest" href="${basePath}manifest.json">\n  <meta name="theme-color" content="${themeColor}">\n  <meta name="apple-mobile-web-app-capable" content="yes">\n  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">\n  <meta name="apple-mobile-web-app-title" content="${shortName}">\n  <meta name="mobile-web-app-capable" content="yes">\n  ${pwIconData.img192?`<link rel="apple-touch-icon" href="${basePath}icon-192.png">`:''}\n  <script>if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('${basePath}sw.js').catch(()=>{});});}<\/script>`;
+    if(html.includes('</head>'))html=html.replace('</head>',pwaHead+'\n</head>');
+    else if(html.includes('<head>'))html=html.replace('<head>','<head>'+pwaHead);
+    else html=pwaHead+'\n'+html;
+    set(1,'running'); await pwGhApi(token,'PUT',`/repos/${pwUser}/${repo}/contents/manifest.json`,{message:'Add manifest.json',content:pwB64(JSON.stringify(manifest,null,2))}); set(1,'done'); await pwSleep(300);
+    set(2,'running'); await pwGhApi(token,'PUT',`/repos/${pwUser}/${repo}/contents/sw.js`,{message:'Add service worker',content:pwB64(sw)}); set(2,'done'); await pwSleep(300);
+    set(3,'running'); await pwGhApi(token,'PUT',`/repos/${pwUser}/${repo}/contents/index.html`,{message:'Add index.html',content:pwB64(html)}); set(3,'done'); await pwSleep(300);
+    set(4,'running');
+    if(pwIconData.img192&&pwIconData.img512){ await pwGhApi(token,'PUT',`/repos/${pwUser}/${repo}/contents/icon-192.png`,{message:'Add icon 192px',content:pwIconData.img192}); await pwGhApi(token,'PUT',`/repos/${pwUser}/${repo}/contents/icon-512.png`,{message:'Add icon 512px',content:pwIconData.img512}); set(4,'done'); }else{ set(4,'skip'); }
+    await pwSleep(300);
+    set(5,'running'); try{ await pwGhApi(token,'POST',`/repos/${pwUser}/${repo}/pages`,{source:{branch:'main',path:'/'}}); }catch(e){ if(!e.message.includes('409')&&!e.message.toLowerCase().includes('already'))throw e; } set(5,'done'); await pwSleep(800);
+    pwDeployedUrl=`https://${pwUser}.github.io/${repo}/`;
+    set(6,'running');
+    const warehouseName=document.getElementById('f-name')?.value.trim()||appName;
+    const warehouseIcon=document.getElementById('f-icon-input')?.value.trim()||'⚡';
+    apps.push({id:uid(),type:'pwa',name:warehouseName,icon:warehouseIcon,desc:desc||appName+' - PWAアプリ',url:pwDeployedUrl,folderId:pwFolderIdForSave||null,repo,ghUser:pwUser,createdAt:Date.now()});
+    await saveToGist(); renderAll(); set(6,'done'); await pwSleep(500);
+    set(7,'running'); await pwSleep(2500); set(7,'done');
+    pwGoStep(4);
+    document.getElementById('pwa-final-url').textContent=pwDeployedUrl;
+    document.getElementById('pwa-open-btn').href=pwDeployedUrl;
+    document.getElementById('pwa-qrcode').innerHTML='';
+    const isDark=document.documentElement.getAttribute('data-theme')==='dark';
+    try{ new QRCode(document.getElementById('pwa-qrcode'),{text:pwDeployedUrl,width:160,height:160,colorDark:'#0a84ff',colorLight:isDark?'#1c1c1e':'#ffffff'}); }catch(e){}
+    showToast('🎉 PWAデプロイ & 倉庫登録完了！');
+  }catch(e){
+    const idx=states.findIndex(s=>s==='running'); if(idx>=0)set(idx,'error');
+    const errEl=document.getElementById('pw-deploy-err'); errEl.textContent='⚠️ '+e.message; errEl.style.display='block';
+    document.getElementById('pwa-deploy-btns').style.display='flex';
+    document.getElementById('pwa-deploy-btn').disabled=false;
+    document.getElementById('pwa-deploy-btn').textContent='🔄 リトライ';
+  }
+}
+function pwCopyUrl() { navigator.clipboard.writeText(pwDeployedUrl).then(()=>showToast('📋 URLをコピーしました')); }
+document.getElementById('pw-visibility').addEventListener('change',function(){ document.getElementById('pw-private-warn').style.display=this.value==='true'?'block':'none'; });
+
+// ================================================================
+// 起動
+// ================================================================
+init();
+</script>
+</body>
+</html>
